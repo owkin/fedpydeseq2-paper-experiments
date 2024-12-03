@@ -1,0 +1,31 @@
+name: Python dev
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11"]
+    name: Building env and linting Python ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Poetry
+        run: pip install poetry==1.8.2
+
+      - name: Install dependencies
+        run: |
+          poetry install --with linting
+
+      - name: Pre-commit checks
+        run: |
+          poetry run pre-commit run --all-files --show-diff-on-failure

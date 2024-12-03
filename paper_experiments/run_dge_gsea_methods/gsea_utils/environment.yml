@@ -1,0 +1,13 @@
+name: pydeseq2_benchmark
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.8
+  - r-base=4.3.0
+  - bioconductor-deseq2=1.40.2
+  - bioconductor-fgsea
+  - r-msigdbr
+  - r-optparse
+  - r-tidyverse

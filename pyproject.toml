@@ -1,0 +1,80 @@
+[tool.poetry]
+description = "This file contains the necessary dependencies to run the paper experiments."
+authors = ["Boris MUZELLEC <boris.muzellec@owkin.com>", "Ulysse MARTEAU <ulysse.marteau@owkin.com>", "Tanguy MARCHAND <tanguy.marchand@owkin.com>"]
+readme = "README.md"
+name = "fedpydeseq2_paper_experiments"
+version = "0.1.0"
+packages = [{include = "paper_experiments", from = "./"}]
+
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+pydeseq2 = "0.4.9"
+fedpydeseq2 = "^0.1.0"
+fedpydeseq2_datasets = "^0.1.0"
+seaborn = "0.13.2"
+statsmodels = "0.14.2"
+adjusttext = "^1.2.0"
+
+[tool.poetry.group.linting]
+optional = true
+
+[tool.poetry.group.linting.dependencies]
+ruff = "^0.2.2"
+pre-commit = "^3.6.2"
+mypy = "^1.8.0"
+black = "^24.2.0"
+pandas-stubs = "^2.2.0.240218"
+
+[tool.poetry.scripts]
+run-dge-gsea = "paper_experiments.run_dge_gsea_methods.dge_gsea_pipe:main"
+fedpydeseq2-tcga-pipe = "paper_experiments.run_dge_gsea_methods.fedpydeseq2_tcga_pipe:main"
+make-fedpydeseq2-remote-scripts = "paper_experiments.run_dge_gsea_methods.make_fedpydeseq2_remote_scripts:main"
+make-plots = "paper_experiments.figures.plot_pipe:main"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+lint.select = [
+    "F",  # Errors detected by Pyflakes
+    "E",  # Error detected by Pycodestyle
+    "W",  # Warning detected by Pycodestyle
+    "I",  # isort
+    "D",  # pydocstyle
+    "B",  # flake8-bugbear
+    "TID",  # flake8-tidy-imports
+    "C4",  # flake8-comprehensions
+    "BLE",  # flake8-blind-except
+    "UP",  # pyupstage
+    "RUF100",  # Report unused noqa directives
+    "D401",  # Start docstrgins with an imperative verb
+    "D415",  # End docstrings with a period
+    "D417",  # Missing argument descriptions in the docstring
+]
+
+lint.ignore = [
+    # Missing docstring in public package
+    "D104",
+    # Missing docstring in public module
+    "D100",
+    # Missing docstring in __init__
+    "D107",
+    # We don’t want a blank line before a class docstring
+    "D203",
+    # We want docstrings to start immediately after the opening triple quote
+    "D213",
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+# Ignore unused imports in __init__.py files
+"*/__init__.py" = ["F401", "I"]
