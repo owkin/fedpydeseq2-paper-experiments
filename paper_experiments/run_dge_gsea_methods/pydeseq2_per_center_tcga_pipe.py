@@ -28,8 +28,7 @@ def run_tcga_pydeseq2_per_center_experiments(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Run the TCGA experiments with per center data.
+    """Run the TCGA experiments with per center data.
 
     Parameters
     ----------
@@ -94,7 +93,6 @@ def run_tcga_pydeseq2_per_center_experiments(
 
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the pydeseq2 strategy.
-
     """
     with tempfile.TemporaryDirectory() as processed_data_path_str:
         processed_data_path = Path(processed_data_path_str)

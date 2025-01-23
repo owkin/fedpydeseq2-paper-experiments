@@ -25,8 +25,7 @@ def create_bash_script(
     heterogeneity_method_params: list[float | None] | None = None,
     fedpydeseq2_wheel_path: str | None = None,
 ):
-    """
-    Create a bash script for running experiments with the given datasets and paths.
+    """Create a bash script for running experiments.
 
     Parameters
     ----------
@@ -34,6 +33,8 @@ def create_bash_script(
         List of dataset names.
     save_file_path : str
         Path where the results will be saved.
+    raw_data_path : str
+        Path to the raw data.
     credentials_path : str
         Path to the credentials file.
     bash_script_output_file : str

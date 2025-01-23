@@ -1,29 +1,29 @@
 pydeseq2_parameters:
   design_factors:
-  - stage
+    - stage
   continuous_factors: null
   refit_cooks: null
   contrast:
-  - stage
-  - Advanced
-  - Non-advanced
+    - stage
+    - Advanced
+    - Non-advanced
 keep_original_centers: true
 datasets:
-- TCGA-NSCLC
-- TCGA-CRC
+  - TCGA-NSCLC
+  - TCGA-CRC
 heterogeneity:
   heterogeneity_method: "binomial"
   heterogeneity_method_params:
-  - 0.5
+    - 0.5
 meta_analysis: META_ANALYSIS_PARAMETERS_ABLATION
 run_dge:
-- pydeseq2
-- fedpydeseq2_simulated
-- meta_analysis
-- pydeseq2_largest
+  - pydeseq2
+  - fedpydeseq2_simulated
+  - meta_analysis
+  - pydeseq2_largest
 run_gsea:
-- fedpydeseq2_simulated
-- meta_analysis
-- pydeseq2_largest
-- pydeseq2
-- fedpydeseq2_remote
+  - fedpydeseq2_simulated
+  - meta_analysis
+  - pydeseq2_largest
+  - pydeseq2
+  - fedpydeseq2_remote

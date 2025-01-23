@@ -25,8 +25,7 @@ def build_pathways_dfs(
     method_gsea_dicts: dict[str, dict[TCGADatasetNames, pd.DataFrame]],
     top_n: int = 10,
 ):
-    """
-    Build summary dataframes with the top n pathways of each method.
+    """Build summary dataframes with the top n pathways of each method.
 
     The input  are dictionaries, where keys are method names and values
     are a dictionary where keys are dataset names and values are pd.DataFrames
@@ -64,7 +63,6 @@ def build_pathways_dfs(
         A dictionary where each key is a method name, and each value is a
         pd.DataFrame containing the p-values indexed by pathways and with columns
         corresponding to the datasets.
-
     """
     # Start by checking that the datasets match
     method_0_gsea_dict = method_gsea_dicts[list(method_gsea_dicts.keys())[0]]
@@ -75,10 +73,12 @@ def build_pathways_dfs(
     # Remove the 'REACTOME_' prefix from pathway names
     for dataset in datasets:
         for method_gsea_dict in method_gsea_dicts.values():
-            method_gsea_dict[dataset].index = [
-                pathway[pathway.startswith("REACTOME_") and len("REACTOME_") :]
-                for pathway in method_gsea_dict[dataset].index
-            ]
+            method_gsea_dict[dataset].index = pd.Index(
+                [
+                    pathway[pathway.startswith("REACTOME_") and len("REACTOME_") :]
+                    for pathway in method_gsea_dict[dataset].index
+                ]
+            )
 
     # Get the top n pathways for each dataset and method
     all_pathways: set[str] = set()
@@ -120,15 +120,14 @@ def make_single_plot(
     df: pd.DataFrame,
     ax: plt.Axes,
     ax_title: str,
-    cbar_ax: plt.Axes,
+    cbar_ax: plt.Axes | None,
     cbar_label: str,
-    cmap: str,
+    cmap: str | LinearSegmentedColormap,
     custom_cmap: bool = False,
     logscale: bool = False,
     **custom_cmap_kwargs: Any,
 ):
-    """
-    Make a single heatmap plot.
+    """Make a single heatmap plot.
 
     Parameters
     ----------
@@ -141,7 +140,7 @@ def make_single_plot(
     ax_title : str
         Title of the axis.
 
-    cbar_ax : plt.Axes
+    cbar_ax : plt.Axes or None
         Axis for the colorbar.
 
     cbar_label  : str
@@ -158,8 +157,6 @@ def make_single_plot(
 
     **custom_cmap_kwargs : Any
         Additional arguments for the custom colormap.
-
-
     """
     if logscale:
         new_df = df.fillna(1.0)
@@ -167,6 +164,7 @@ def make_single_plot(
         new_df = df.fillna(0.0)
 
     if custom_cmap:
+        assert isinstance(cmap, str)
         cmap = create_cmap_from_diverging_cmap(
             cmap_name=cmap, logspace=logscale, **custom_cmap_kwargs
         )
@@ -180,14 +178,16 @@ def make_single_plot(
         cbar_kws={"label": cbar_label},
         center=0,
         ax=ax,
-        norm=LogNorm(
-            vmin=custom_cmap_kwargs.get("min_value", None),
-            vmax=custom_cmap_kwargs.get("max_value", None),
-        )
-        if logscale
-        else Normalize(
-            vmin=custom_cmap_kwargs.get("min_value", None),
-            vmax=custom_cmap_kwargs.get("max_value", None),
+        norm=(
+            LogNorm(
+                vmin=custom_cmap_kwargs.get("min_value", None),
+                vmax=custom_cmap_kwargs.get("max_value", None),
+            )
+            if logscale
+            else Normalize(
+                vmin=custom_cmap_kwargs.get("min_value", None),
+                vmax=custom_cmap_kwargs.get("max_value", None),
+            )
         ),
     )
 
@@ -213,8 +213,7 @@ def make_gsea_plot(
     padj_max_pvalues: float = 0.1,
     padj_min_pvalues: float = 1e-3,
 ):
-    """
-    Make a heatmap of the GSEA results for method 1 and method 2.
+    """Make a heatmap of the GSEA results for method 1 and method 2.
 
     Parameters
     ----------
@@ -254,7 +253,6 @@ def make_gsea_plot(
 
     padj_min_pvalues : float
         The minimum p-value to consider for the p-values heatmap.
-
     """
     n_methods = len(method_nes_dict)
     assert set(method_nes_dict.keys()) == set(method_pvalues_dict.keys())
@@ -370,9 +368,11 @@ def make_gsea_plot(
             make_single_plot(
                 diff_df,
                 axes[ax_number],
-                f"{name_map[method_name]} \n - \n {name_map[reference_method_name]}"
-                if (method_name in name_map) and (reference_method_name in name_map)
-                else f"{method_name} - {reference_method_name}",
+                (
+                    f"{name_map[method_name]} \n - \n {name_map[reference_method_name]}"
+                    if (method_name in name_map) and (reference_method_name in name_map)
+                    else f"{method_name} - {reference_method_name}"
+                ),
                 cbar_ax,
                 "Normalized enrichment score (NES)",
                 "seismic",
@@ -381,10 +381,11 @@ def make_gsea_plot(
             ax_number += 1
 
     # Increase colorbar font size
-    cbar_ax.yaxis.label.set_size(18)
+    cbar_ax.yaxis.label.set_fontsize(18)
     cbar_ax.tick_params(labelsize=14)
     if with_pvalues:
-        cbar_ax_pvalues.yaxis.label.set_size(18)
+        assert cbar_ax_pvalues is not None
+        cbar_ax_pvalues.yaxis.label.set_fontsize(18)
         cbar_ax_pvalues.tick_params(labelsize=14)
 
     # Save figure
@@ -399,8 +400,7 @@ def get_fedpydeseq2_gsea_dict(
     experiment_id: str,
     method_type: str,
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for fedpydeseq2.
+    """Get the GSEA results for fedpydeseq2.
 
     Parameters
     ----------
@@ -425,7 +425,6 @@ def get_fedpydeseq2_gsea_dict(
     ------
     ValueError
         If method_type is not recognized.
-
     """
     fedpydeseq2_gsea_path = Path(fedpydeseq2_gsea_path)
     gsea_result = pd.read_csv(
@@ -448,8 +447,7 @@ def get_pooled_pydeseq2_gsea_dict(
     refit_cooks: bool = True,
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for pydeseq2 pooled.
+    """Get the GSEA results for pydeseq2 pooled.
 
     Parameters
     ----------
@@ -471,7 +469,6 @@ def get_pooled_pydeseq2_gsea_dict(
         A dictionary containing the GSEA results for pydeseq2 pooled, where the key is
         "PyDESeq2 pooled" and the value is a pd.DataFrame containing the GSEA
         results for the specified experiment id (dataset)
-
     """
     pooled_gsea_path = Path(pooled_pydeseq2_gsea_path)
     ground_truth_dds_name = get_ground_truth_dds_name(
@@ -497,8 +494,7 @@ def get_pydeseq2_largest_gsea_dict(
     refit_cooks: bool = True,
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for pydeseq2 pooled.
+    """Get the GSEA results for pydeseq2 pooled.
 
     Parameters
     ----------
@@ -520,7 +516,6 @@ def get_pydeseq2_largest_gsea_dict(
         A dictionary containing the GSEA results for pydeseq2 pooled, where the key is
         "PyDESeq2 pooled" and the value is a pd.DataFrame containing the GSEA
         results for the specified experiment id (dataset)
-
     """
     pydeseq2_largest_gsea_path = Path(pydeseq2_largest_gsea_path)
     ground_truth_dds_name = get_ground_truth_dds_name(
@@ -545,8 +540,7 @@ def get_per_center_pydeseq2_gsea_dict(
     refit_cooks: bool = True,
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for pydeseq2 per center.
+    """Get the GSEA results for pydeseq2 per center.
 
     Parameters
     ----------
@@ -569,7 +563,6 @@ def get_per_center_pydeseq2_gsea_dict(
         where the key is
         "PyDESeq2 per center" and the value is a pd.DataFrame containing the GSEA
         results for the specified experiment id (dataset)
-
     """
     centers_gsea_path = Path(per_center_pydeseq2_gsea_path)
     ground_truth_dds_name = get_ground_truth_dds_name(
@@ -600,8 +593,7 @@ def get_meta_analysis_gsea_dict(
     experiment_id: str,
     meta_analysis_parameters: list[MetaAnalysisParameter],
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for the meta analysis.
+    """Get the GSEA results for the meta analysis.
 
     Parameters
     ----------
@@ -620,7 +612,6 @@ def get_meta_analysis_gsea_dict(
         A dictionary containing the GSEA results for the meta analysis, where the key is
         the meta analysis parameters and the value is a pd.DataFrame containing the GSEA
         results for the specified experiment id (dataset)
-
     """
     meta_analysis_gsea_path = Path(meta_analysis_gsea_path)
     meta_analysis_ids = [
@@ -659,8 +650,7 @@ def get_method_experiment_id_gsea_dict(
     reference_dds_ref_level: tuple[str, str] | None = ("stage", "Advanced"),
     meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
 ) -> dict[str, pd.DataFrame]:
-    """
-    Get the GSEA results for a method.
+    """Get the GSEA results for a method.
 
     Parameters
     ----------
@@ -690,7 +680,6 @@ def get_method_experiment_id_gsea_dict(
         A dictionary containing the GSEA results for the method, where the key is
         the method name and the value is a pd.DataFrame containing the GSEA
         results for the specified experiment id (dataset)
-
     """
     assert method_type in DGE_MODES, f"Method {method_type} not recognized."
     if method_type.startswith("fedpydeseq2"):
@@ -750,8 +739,7 @@ def make_gsea_plot_dge_pair(
     separate_plots: bool = False,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Make a GSEA plot comparing the results of two DGE methods.
+    """Make a GSEA plot comparing the results of two DGE methods.
 
     Parameters
     ----------
@@ -811,7 +799,6 @@ def make_gsea_plot_dge_pair(
 
     **pydeseq2_kwargs : Any
         Additional arguments for the pydeseq2 methods.
-
     """
     refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
     experiment_ids = [
@@ -958,8 +945,7 @@ def make_gsea_plot_method_pairs(
     separate_plots: list[bool] | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Make GSEA plots for pairs of methods.
+    """Make GSEA plots for pairs of methods.
 
     Parameters
     ----------
@@ -1013,7 +999,6 @@ def make_gsea_plot_method_pairs(
 
     pydeseq2_kwargs : Any
         Additional arguments for the pydeseq2 methods.
-
     """
     if separate_plots is None:
         separate_plots = [False] * len(method_pairs)
@@ -1056,8 +1041,7 @@ def get_gsea_plot_filename(
     with_pvalues: bool = False,
     method_name: str | None = None,
 ):
-    """
-    Get the filename for the GSEA plot.
+    """Get the filename for the GSEA plot.
 
     Parameters
     ----------
@@ -1113,8 +1097,7 @@ def create_cmap_from_diverging_cmap(
     logspace: bool = True,
     n_points=1000,
 ) -> LinearSegmentedColormap:
-    """
-    Create a new colormap by interpolating the colors of a diverging colormap.
+    """Create a new colormap by interpolating the colors.
 
     The goal of this function is to create a colourmap relevant to visualize
     pvalues.
@@ -1150,7 +1133,6 @@ def create_cmap_from_diverging_cmap(
     -------
     LinearSegmentedColormap
         The new colormap.
-
     """
     # Get the original colormap
     cmap = plt.get_cmap(cmap_name)
@@ -1202,6 +1184,6 @@ def create_cmap_from_diverging_cmap(
     }
 
     # Create the new colormap
-    new_cmap = LinearSegmentedColormap(cmap_name, cdict)
+    new_cmap = LinearSegmentedColormap(cmap_name, cdict)  # type: ignore
 
     return new_cmap

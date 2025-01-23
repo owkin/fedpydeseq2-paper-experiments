@@ -31,8 +31,7 @@ def run_dge_gsea_methods(
     raw_data_path: str | Path,
     conda_activate_path: str | Path | None,
 ):
-    """
-    Run the DGE and GSEA methods.
+    """Run the DGE and GSEA methods.
 
     Parameters
     ----------
@@ -88,7 +87,6 @@ def run_dge_gsea_methods(
 
     conda_activate_path : str or Path or None
         The path to the conda activate script.
-
     """
     raw_data_path = Path(raw_data_path)
     # Load parameters from config

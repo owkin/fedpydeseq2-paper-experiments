@@ -1,0 +1,6 @@
+graphs_to_build:
+  - [null, 1, 0, false]
+  - [null, null, 0, false]
+  - [null, 2, 0, true]
+  - ["run_deseq2_lfc_dispersions", 2, 0, true]
+  - ["run_deseq2_lfc_dispersions", 2, 1, false]

@@ -36,8 +36,7 @@ def get_input_output_paths_pydeseq2_per_center(
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
     **pydeseq2_kwargs: Any,
 ) -> tuple[list, list]:
-    """
-    Get input and output paths for the GSEA for each center.
+    """Get input and output paths for the GSEA for each center.
 
     Parameters
     ----------
@@ -84,7 +83,6 @@ def get_input_output_paths_pydeseq2_per_center(
     -------
     tuple[list,list]
         The input and output paths
-
     """
     centers_results_path = Path(centers_results_path)
     refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
@@ -165,8 +163,7 @@ def get_input_output_paths_pydeseq2_largest(
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
     **pydeseq2_kwargs: Any,
 ) -> tuple[list, list]:
-    """
-    Get input and output paths for the GSEA for the largest center.
+    """Get input and output paths for the GSEA for the largest center.
 
     Parameters
     ----------
@@ -213,7 +210,6 @@ def get_input_output_paths_pydeseq2_largest(
     -------
     tuple[list,list]
         The input and output paths
-
     """
     centers_results_path = Path(centers_results_path)
     refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
@@ -294,8 +290,7 @@ def get_input_output_paths_pydeseq2_pooled(
     reference_dds_ref_level: tuple[str, str] = ("stage", "Advanced"),
     **pydeseq2_kwargs: Any,
 ) -> tuple[Path, Path]:
-    """
-    Get input and output paths for the GSEA for the pooled results.
+    """Get input and output paths for the GSEA for the pooled results.
 
     Parameters
     ----------
@@ -342,7 +337,6 @@ def get_input_output_paths_pydeseq2_pooled(
     -------
     tuple[Path,Path]
         The input and output paths
-
     """
     pooled_results_path = Path(pooled_results_path)
     refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
@@ -393,8 +387,7 @@ def save_fl_result_as_csv(
     force: bool = False,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Convert the fl result to csv in order to perform the gsea analysis.
+    """Convert the fl result to csv in order to perform the gsea analysis.
 
     Parameters
     ----------
@@ -433,7 +426,6 @@ def save_fl_result_as_csv(
 
     **pydeseq2_kwargs : Any
         Additional arguments to pass to the pydeseq2 function.
-
     """
     experiment_id = get_experiment_id(
         dataset_name=dataset_name,
@@ -485,8 +477,7 @@ def get_input_output_paths_fedpydeseq2(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ) -> tuple[Path, Path]:
-    """
-    Get input and output paths for the GSEA for the fedpydeseq2 results.
+    """Get input and output paths for the GSEA for the fedpydeseq2 results.
 
     Parameters
     ----------
@@ -531,7 +522,6 @@ def get_input_output_paths_fedpydeseq2(
     -------
     tuple[Path,Path]
         The input and output paths
-
     """
     fl_results_path = Path(fl_results_path)
     tmp_fl_results_dir = Path(tmp_fl_results_dir)
@@ -589,8 +579,7 @@ def get_input_output_paths_meta_analysis(
     stats_clip_value: float | None = None,
     **pydeseq2_kwargs: Any,
 ) -> tuple[Path, Path]:
-    """
-    Get input and output paths for the GSEA for the fedpydeseq2 results.
+    """Get input and output paths for the GSEA for the fedpydeseq2 results.
 
     Parameters
     ----------
@@ -646,7 +635,6 @@ def get_input_output_paths_meta_analysis(
     -------
     tuple[Path,Path]
         The input and output paths
-
     """
     meta_analysis_results_path = Path(meta_analysis_results_path)
 
@@ -691,8 +679,7 @@ def run_gsea_method(
     conda_activate_path: str | Path | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Run a bash script to run the GSEA analysis for the given DGE mode and datasets.
+    """Run a bash script to run the GSEA analysis.
 
     Parameters
     ----------
@@ -742,7 +729,6 @@ def run_gsea_method(
 
     **pydeseq2_kwargs : Any
         Additional arguments to pass to the pydeseq2 function.
-
     """
     # Check the keys of both dictionaries
     assert set(dge_results_paths.keys()) == set(gsea_results_paths.keys())

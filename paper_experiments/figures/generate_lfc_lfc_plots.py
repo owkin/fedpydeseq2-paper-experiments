@@ -37,8 +37,7 @@ def build_lfc_lfc_and_padj_padj_plot(
     log2fold_clip: float | None = 10,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build a lfc / lfc and a pad / padj plot for a given method.
+    """Build a lfc / lfc and a pad / padj plot for a given method.
 
     Compares the log-fold changes and adjusted p-values of a method with PyDESeq2.
 
@@ -139,6 +138,9 @@ def build_lfc_lfc_and_padj_padj_plot(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
+    assert isinstance(pydeseq2_padj, pd.Series)
+    assert isinstance(pydeseq2_lfc, pd.Series)
+
     logger.info(
         f"Building lfc-lfc and padj-padj plots for {dataset_name} ({method_name})."
     )
@@ -148,9 +150,9 @@ def build_lfc_lfc_and_padj_padj_plot(
         assert set(method_padj.keys()) == set(method_lfc.keys())
         for method_id in method_padj.keys():
             # Extract the meta-analysis submethod name in a more readable format
-            submethod_name = method_id.split(", ")[1:]
+            submethod_name_list = method_id.split(", ")[1:]
             submethod_name = "_".join(
-                [param for param in submethod_name if param != "None"]
+                [param for param in submethod_name_list if param != "None"]
             )
 
             lfc_save_file_path = (
@@ -201,6 +203,8 @@ def build_lfc_lfc_and_padj_padj_plot(
         padj_save_file_path = (
             save_path / experiment_id / f"padj_padj_plot_{method_name}.pdf"
         )
+        assert isinstance(method_padj, pd.Series)
+        assert isinstance(method_lfc, pd.Series)
 
         make_lfc_lfc_plot(
             method_padj,
@@ -244,8 +248,7 @@ def make_lfc_lfc_plot(
     pydeseq2_padj: pd.Series | None = None,
     log2fold_clip: float | None = 10,
 ):
-    """
-    Create a plot comparing log2-fold changes of a method with PyDESeq2.
+    """Create a plot comparing log2-fold changes of a method with PyDESeq2.
 
     Summarizes the results of a differential expression analysis by plotting
     the log2 fold changes of a tested method against the log2 fold change of pydeseq2,
@@ -644,8 +647,9 @@ def make_padj_padj_plot(
     pydeseq2_lfc: pd.Series | None = None,
     nlog10pval_clip: float | None = 10,
 ):
-    """
-    Create a plot comparing adjusted p-values of a method with PyDESeq2, in log scale.
+    """Create a plot comparing adjusted p-values of a method with PyDESeq2.
+
+    This plot is done in log scale.
 
     Summarizes the results of a differential expression analysis by plotting
     the adjusted p-values of a tested method against the adjusted p-values of pydeseq2,

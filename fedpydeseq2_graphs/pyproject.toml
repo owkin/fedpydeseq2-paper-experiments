@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "fedpydeseq2-graphs"
+authors = ["Ulysse MARTEAU <ulyse.marteau@owkin.com>"]
+description = "Graphs for the fedpydeseq2 package"
+readme = "README.md"
+version = "0.0.1"
+packages = [{include = "fedpydeseq2_graphs", from = "./"}]
+
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+loguru = "0.7.2"
+pandas = "2.2.2"
+graphviz = "0.20.3"
+tabulate = "0.9.0"
+numpy = "1.26.4"
+jinja2 = "3.1.4"
+fedpydeseq2 = "^0.1.1"
+fedpydeseq2-datasets = "^0.1.0"
+
+
+[tool.poetry.scripts]
+generate-worflow = "fedpydeseq2_graphs.get_workflow_file:main"
+clean-workflow = "fedpydeseq2_graphs.clean_log_file:main"
+create-tree = "fedpydeseq2_graphs.create_tree:main"
+create-graphs-tables = "fedpydeseq2_graphs.create_graphs:main"
