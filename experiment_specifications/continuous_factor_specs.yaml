@@ -87,7 +87,6 @@ plots:
     - pydeseq2
   violin_plots:
     methods:
-    - fedpydeseq2_simulated
     - fedpydeseq2_remote
     - meta_analysis
     - pydeseq2_largest
