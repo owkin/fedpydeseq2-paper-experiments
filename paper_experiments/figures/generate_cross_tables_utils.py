@@ -26,8 +26,14 @@ NAME_MAPPING = {
     "pydeseq2": "PyDESeq2",
     "fedpydeseq2_simulated": "FedPyDESeq2 (simulated)",
     "fedpydeseq2_remote": "FedPyDESeq2",
+    "pydeseq2_largest": "PyDESeq2 (largest cohort)",
     "meta_analysis": "Meta-analysis",
-    "pydeseq2_largest": "PyDESeq2 (largest)",
+    "fixed_effect": "Fixed effect",
+    "random_effect_dl": "Random effect\n(DerSimonian-Laird)",
+    "random_effect_iterated": "Random effect\n(iterated)",
+    "pydeseq2_largest": "PyDESeq2\n(largest)",
+    "pvalue_combination_fisher": "Fisher",
+    "pvalue_combination_stouffer": "Stouffer",
 }
 
 
@@ -868,6 +874,11 @@ def build_cross_table(
         n_methods = len(method_test_padj)
         fig, axes = plt.subplots(1, n_methods, figsize=(n_methods * 8, 8), sharey=True)
         for i, method_id in enumerate(sorted(method_test_padj.keys())):
+            # Extract the meta-analysis submethod name in a more readable format
+            submethod_name = method_id.split(", ")[1:]
+            submethod_name = "_".join(
+                [param for param in submethod_name if param != "None"]
+            )
             center_padj = method_test_padj[method_id]
             build_cross_table_on_ax(
                 method_test_padj=center_padj,
@@ -876,8 +887,8 @@ def build_cross_table(
                 method_ref_LFC=method_ref_LFC,
                 padj_threshold=padj_threshold,
                 log2fc_threshold=log2fc_threshold,
-                plot_title=plot_title,
-                method_test_name=method_id,
+                plot_title=None,
+                method_test_name=NAME_MAPPING[submethod_name],
                 method_ref_name=method_ref_name,
                 ax=axes[i],
             )
@@ -1003,11 +1014,12 @@ def build_cross_table_on_ax(
         vmax=1.0,
         annot_kws={"size": 14},
     )
-    ax.set_xlabel(method_ref_name, fontsize=14)
-    ax.set_ylabel(method_test_name, fontsize=14)
-    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=12)
-    ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=12)
-    ax.set_title(plot_title, fontsize=16)
+    ax.set_xlabel(method_ref_name, fontsize=16)
+    ax.set_ylabel(method_test_name, fontsize=16)
+    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=14)
+    ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=14)
+    if plot_title is not None:
+        ax.set_title(plot_title, fontsize=16)
 
 
 def build_33_confusion_matrix(
