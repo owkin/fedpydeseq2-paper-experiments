@@ -16,6 +16,17 @@ from paper_experiments.figures.generate_cross_tables_utils import (
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
+NAME_MAPPING = {
+    "fedpydeseq2_remote": "FedPyDESeq2",
+    "fixed_effect": "Fixed effect",
+    "random_effect_dl": "Random effect\n(DerSimonian-Laird)",
+    "random_effect_iterated": "Random effect\n(iterated)",
+    "pydeseq2_largest": "PyDESeq2\n(largest)",
+    "pvalue_combination_fisher": "Fisher",
+    "pvalue_combination_stouffer": "Stouffer",
+}
+
+
 def build_lfc_or_padj_rel_error_violin_plot(
     methods: list[str],
     method_results_paths: dict[str, Path],
@@ -252,6 +263,13 @@ def make_lfc_or_padj_violin_plot(
             ),
         ),
     )
+
+    # Change the x-axis labels
+    ax.set_xticklabels(
+        [NAME_MAPPING[method_name] for method_name in df["method"].unique()]
+    )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
 
     for axis in ["bottom", "left"]:
         ax.spines[axis].set_linewidth(2)
