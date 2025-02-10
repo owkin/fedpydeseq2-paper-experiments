@@ -166,7 +166,7 @@ def build_volcano_plot(
                 padj_threshold,
                 log2fc_threshold,
                 save_file_path,
-                plot_title=f"{NAME_MAPPING[method_name]} ({submethod_name})",
+                plot_title=f"{NAME_MAPPING[submethod_name]}",
                 annotate_genes=False,
                 write_legend=True,
                 pydeseq2_padj=pydeseq2_padj,
