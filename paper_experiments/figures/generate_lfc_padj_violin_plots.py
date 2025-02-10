@@ -10,21 +10,9 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.scale import SymmetricalLogScale
 
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import NAME_MAPPING
+from paper_experiments.figures.utils import get_padj_lfc_from_method
 from paper_experiments.utils.constants import MetaAnalysisParameter
-
-
-NAME_MAPPING = {
-    "fedpydeseq2_remote": "FedPyDESeq2",
-    "fixed_effect": "Fixed effect",
-    "random_effect_dl": "Random effect\n(DerSimonian-Laird)",
-    "random_effect_iterated": "Random effect\n(iterated)",
-    "pydeseq2_largest": "PyDESeq2\n(largest)",
-    "pvalue_combination_fisher": "Fisher",
-    "pvalue_combination_stouffer": "Stouffer",
-}
 
 
 def build_lfc_or_padj_rel_error_violin_plot(

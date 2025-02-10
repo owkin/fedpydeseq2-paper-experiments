@@ -11,10 +11,8 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.lines import Line2D
 
-from paper_experiments.figures.generate_cross_tables_utils import NAME_MAPPING
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import NAME_MAPPING
+from paper_experiments.figures.utils import get_padj_lfc_from_method
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
