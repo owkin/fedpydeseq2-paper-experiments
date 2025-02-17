@@ -190,7 +190,7 @@ def build_pan_cancer_confusion_matrix(
             fmt="g",
             vmin=0.0,
             vmax=1.0,
-            cmap="flare_r",
+            cmap="viridis",
             linewidths=1.0,
             annot_kws={"size": 14},
             cbar_ax=cbar_ax,
@@ -367,12 +367,12 @@ def build_test_vs_ref_cross_table(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
-    assert not (
-        isinstance(method_ref_padj, dict)
-    ), "Reference method should not be per center nor meta-analysis"
-    assert not (
-        isinstance(method_ref_lfc, dict)
-    ), "Reference method should not be per center nor meta-analysis"
+    assert not (isinstance(method_ref_padj, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
+    assert not (isinstance(method_ref_lfc, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
 
     save_file_path = (
         cross_table_save_path
