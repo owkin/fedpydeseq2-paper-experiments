@@ -104,9 +104,7 @@ def build_pan_cancer_confusion_matrix(
     )
     cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
 
-    logger.info(
-        f"Building pan-cancer cross table for {method_test} vs " f"{method_ref}."
-    )
+    logger.info(f"Building pan-cancer cross table for {method_test} vs {method_ref}.")
 
     for i, dataset_name in enumerate(dataset_names):
         experiment_id = get_experiment_id(
@@ -369,12 +367,12 @@ def build_test_vs_ref_cross_table(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
-    assert not (
-        isinstance(method_ref_padj, dict)
-    ), "Reference method should not be per center nor meta-analysis"
-    assert not (
-        isinstance(method_ref_lfc, dict)
-    ), "Reference method should not be per center nor meta-analysis"
+    assert not (isinstance(method_ref_padj, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
+    assert not (isinstance(method_ref_lfc, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
 
     save_file_path = (
         cross_table_save_path
@@ -626,7 +624,7 @@ def build_cross_table_on_ax(
     method_ref_LFC: pd.Series,
     padj_threshold: float,
     log2fc_threshold: float,
-    plot_title: str,
+    plot_title: str | None,
     method_test_name: str,
     method_ref_name: str,
     ax: plt.Axes,
@@ -656,7 +654,7 @@ def build_cross_table_on_ax(
     log2fc_threshold : float
         The log2-fold change threshold to consider a gene as differentially expressed.
 
-    plot_title : str
+    plot_title : str or None
         The title of the plot.
 
     method_test_name : str
