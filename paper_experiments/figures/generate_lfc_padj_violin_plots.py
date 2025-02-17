@@ -258,7 +258,6 @@ def make_lfc_or_padj_violin_plot(
     )
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
 
-
     for axis in ["bottom", "left"]:
         ax.spines[axis].set_linewidth(2)
 
