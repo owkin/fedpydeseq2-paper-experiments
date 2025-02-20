@@ -42,7 +42,7 @@ def process_method_name(method_name: str) -> str:
         The processed method name.
 
     """
-    if method_name.startswith("meta_analysis"):
+    if method_name.startswith("Meta-analysis"):
         # Extract the meta-analysis submethod name in a more readable format
         submethod_name = "_".join(
             [param for param in method_name.split(", ")[1:] if param != "None"]
