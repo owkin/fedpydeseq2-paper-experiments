@@ -493,7 +493,7 @@ def build_heterogeneity_grid_plot(
                 else:
                     assert isinstance(method_test_padj, pd.Series)
                     assert isinstance(method_test_lfc, pd.Series)
-                    method_test_str = process_method_name(method_test)
+                    method_test_str = method_test
                     if heterogeneity_id == 0:
                         methods_test_padj_lfc[method_test_str] = []
                     methods_test_padj_lfc[method_test_str].append(
@@ -541,7 +541,7 @@ def build_heterogeneity_grid_plot(
                 for k, score in enumerate(scores_list):
                     lines.append(
                         {
-                            "method_test_name": method_test,
+                            "method_test_name": process_method_name(method_test),
                             # Here we invert the heterogeneity level
                             "heterogeneity level": 1.0 - heterogeneity_method_params[k],
                             "score": score,
@@ -760,7 +760,7 @@ def build_test_vs_ref_heterogeneity_plot(
             else:
                 assert isinstance(method_test_padj, pd.Series)
                 assert isinstance(method_test_lfc, pd.Series)
-                method_test_str = process_method_name(method_test)
+                method_test_str = method_test
                 if heterogeneity_id == 0:
                     methods_test_padj_lfc[method_test_str] = []
                 methods_test_padj_lfc[method_test_str].append(
@@ -860,7 +860,7 @@ def make_heterogeneity_plot(
         for i, score in enumerate(scores_list):
             lines.append(
                 {
-                    "method_test_name": method_test,
+                    "method_test_name": process_method_name(method_test),
                     # Here we invert the heterogeneity level
                     "heterogeneity level": heterogeneity_method_params_names[i]
                     if heterogeneity_method_params_names is not None
@@ -892,7 +892,8 @@ def make_heterogeneity_plot(
     _, xlabels = plt.xticks()
     xticks_loc = ax.get_xticks()
     ax.set_xticks(xticks_loc)
-    ax.set_xticklabels(xlabels, size=5)
+    ax.set_xlabel("")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
     # create the save directory
     heterogeneity_plot_save_path = Path(heterogeneity_plot_save_path)
     heterogeneity_plot_save_path.parent.mkdir(parents=True, exist_ok=True)
