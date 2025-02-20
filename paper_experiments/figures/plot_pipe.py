@@ -170,6 +170,7 @@ def run_plot_pipe(
                 methods_test=method_test,
                 method_ref=method_ref,
                 methods_results_path=method_results_paths,
+                heterogeneity_plot_save_path=heterogeneity_plots_path,
                 plot_title=(
                     f"{dataset} - {SCORING_FUNCTIONS_YLABELS[scoring_function_name]}"
                 ),
