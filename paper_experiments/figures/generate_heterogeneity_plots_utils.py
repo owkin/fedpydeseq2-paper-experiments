@@ -11,6 +11,7 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib import pyplot as plt
 
+from paper_experiments.figures.utils import SCORING_FUNCTIONS_YLABELS
 from paper_experiments.figures.utils import get_de_genes
 from paper_experiments.figures.utils import get_padj_lfc_from_method
 from paper_experiments.figures.utils import process_method_name
@@ -301,31 +302,6 @@ SCORING_FUNCTIONS: dict[str, Callable] = {
     ),
     "pearson_correlation_lfcs_0.05": partial(
         pearson_correlation_lfcs, padj_threshold=0.05
-    ),
-}
-
-SCORING_FUNCTIONS_YLABELS: dict[str, str] = {
-    "sensitivity_0.05_2.0": "Sensitivity",
-    "f1_score_0.05_2.0": "F1 score",
-    "pearson_correlation_pvalues": "Pearson correlation of -log10(p-values)",
-    "pearson_correlation_lfcs": "Pearson correlation of log fold changes",
-    "pearson_correlation_pvalues_0.05": (
-        "Pearson correlation of -log10(p-values) \n (padj < 0.05)"
-    ),
-    "pearson_correlation_lfcs_0.05": (
-        "Pearson correlation of log fold changes \n (padj < 0.05)"
-    ),
-    "pearson_correlation_pvalues_7": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-7)"
-    ),
-    "pearson_correlation_pvalues_10": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-10)"
-    ),
-    "pearson_correlation_pvalues_12": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-12)"
-    ),
-    "pearson_correlation_pvalues_15": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-15)"
     ),
 }
 
