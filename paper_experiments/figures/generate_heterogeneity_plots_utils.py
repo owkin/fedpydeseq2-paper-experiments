@@ -538,7 +538,7 @@ def build_heterogeneity_grid_plot(
             lines = []
 
             for method_test, scores_list in scores.items():
-                for k, score in enumerate(scores_list):  # TODO check silent variable
+                for k, score in enumerate(scores_list):
                     lines.append(
                         {
                             "method_test_name": process_method_name(method_test),
