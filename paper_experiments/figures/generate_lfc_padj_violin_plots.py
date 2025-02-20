@@ -10,8 +10,8 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.scale import SymmetricalLogScale
 
-from paper_experiments.figures.utils import NAME_MAPPING
 from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
@@ -254,7 +254,7 @@ def make_lfc_or_padj_violin_plot(
 
     # Change the x-axis labels
     ax.set_xticklabels(
-        [NAME_MAPPING[method_name] for method_name in df["method"].unique()]
+        [process_method_name(method_name) for method_name in df["method"].unique()]
     )
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
 

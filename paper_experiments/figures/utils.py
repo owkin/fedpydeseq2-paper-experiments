@@ -1,6 +1,7 @@
 import pickle
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from fedpydeseq2.core.utils.stat_utils import build_contrast_vector
 from fedpydeseq2_datasets.utils import get_ground_truth_dds_name
@@ -24,6 +25,31 @@ NAME_MAPPING = {
     "pvalue_combination_fisher": "Fisher",
     "pvalue_combination_stouffer": "Stouffer",
 }
+
+
+def process_method_name(method_name: str) -> str:
+    """
+    Make method name more readable.
+
+    Parameters
+    ----------
+    method_name : str
+        The method test name.
+
+    Returns
+    -------
+    str
+        The processed method name.
+
+    """
+    if method_name.startswith("meta_analysis"):
+        # Extract the meta-analysis submethod name in a more readable format
+        submethod_name = "_".join(
+            [param for param in method_name.split(", ")[1:] if param != "None"]
+        )
+        return NAME_MAPPING[submethod_name]
+    else:
+        return NAME_MAPPING[method_name]
 
 
 def get_padj_lfc_fedpydeseq2(
@@ -300,3 +326,46 @@ def get_padj_lfc_from_method(
         return all_padj, all_LFC
     else:
         raise ValueError(f"Unknown DGE method: {dge_method}")
+
+
+def get_de_genes(
+    method_padj: pd.Series,
+    method_lfc: pd.Series,
+    padj_threshold: float | None,
+    log2fc_threshold: float | None,
+) -> pd.Index:
+    """
+    Get the differentially expressed genes.
+
+    We define the differentially expressed genes as the genes with an adjusted p-value
+    below a certain threshold and an absolute log fold change above a certain threshold.
+
+    Parameters
+    ----------
+    method_padj : pd.Series
+        The adjusted p-values, indexed by gene names.
+
+    method_lfc : pd.Series
+        The log fold changes, indexed by gene names, *in natural scale*.
+
+    padj_threshold : float or None
+        The adjusted p-value threshold.
+
+    log2fc_threshold : float or None
+        The log2 fold change threshold.
+
+    Returns
+    -------
+    pd.Index
+        The differentially expressed genes.
+
+    """
+    # Initialize a boolean series to True
+    condition = pd.Series(True, index=method_padj.index)
+    if padj_threshold is not None:
+        condition &= method_padj < padj_threshold
+
+    if log2fc_threshold is not None:
+        condition &= np.abs(method_lfc) > np.log(2) * log2fc_threshold
+    method_diff_genes = method_padj[condition].index
+    return method_diff_genes

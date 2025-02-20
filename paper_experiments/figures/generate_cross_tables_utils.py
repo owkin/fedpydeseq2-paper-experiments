@@ -12,8 +12,8 @@ from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter
 
-from paper_experiments.figures.utils import NAME_MAPPING
 from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
@@ -200,8 +200,8 @@ def build_pan_cancer_confusion_matrix(
         cbar = ax.collections[0].colorbar
         cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
 
-        ax.set_xlabel(NAME_MAPPING[method_ref], fontsize=15)
-        ax.set_ylabel(NAME_MAPPING[method_test], fontsize=15)
+        ax.set_xlabel(process_method_name(method_ref), fontsize=15)
+        ax.set_ylabel(process_method_name(method_test), fontsize=15)
         ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=12)
         ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=12)
         ax.set_title(f"{dataset_name}", fontsize=16)
@@ -387,11 +387,12 @@ def build_test_vs_ref_cross_table(
         padj_threshold=padj_threshold,
         log2fc_threshold=log2fc_threshold,
         plot_title=(
-            f"Cross table for {NAME_MAPPING[method_test]} vs {NAME_MAPPING[method_ref]}"
+            f"Cross table for {process_method_name(method_test)} vs "
+            f"{process_method_name(method_ref)}"
         ),
         save_file_path=save_file_path,
-        method_test_name=NAME_MAPPING[method_test],
-        method_ref_name=NAME_MAPPING[method_ref],
+        method_test_name=process_method_name(method_test),
+        method_ref_name=process_method_name(method_ref),
     )
 
 
@@ -576,11 +577,6 @@ def build_cross_table(
         n_methods = len(method_test_padj)
         fig, axes = plt.subplots(1, n_methods, figsize=(n_methods * 8, 8), sharey=True)
         for i, method_id in enumerate(sorted(method_test_padj.keys())):
-            # Extract the meta-analysis submethod name in a more readable format
-            submethod_name = method_id.split(", ")[1:]
-            submethod_name = "_".join(
-                [param for param in submethod_name if param != "None"]
-            )
             center_padj = method_test_padj[method_id]
             build_cross_table_on_ax(
                 method_test_padj=center_padj,
@@ -590,7 +586,7 @@ def build_cross_table(
                 padj_threshold=padj_threshold,
                 log2fc_threshold=log2fc_threshold,
                 plot_title=None,
-                method_test_name=NAME_MAPPING[submethod_name],
+                method_test_name=process_method_name(method_id),
                 method_ref_name=method_ref_name,
                 ax=axes[i],
             )
