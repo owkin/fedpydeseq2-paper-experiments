@@ -860,7 +860,7 @@ def make_heterogeneity_plot(
         for i, score in enumerate(scores_list):
             lines.append(
                 {
-                    "method_test_name": process_method_name(method_test),
+                    "method_test_name": method_test,
                     # Here we invert the heterogeneity level
                     "heterogeneity level": heterogeneity_method_params_names[i]
                     if heterogeneity_method_params_names is not None
