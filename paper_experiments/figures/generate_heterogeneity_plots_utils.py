@@ -541,7 +541,7 @@ def build_heterogeneity_grid_plot(
                 for k, score in enumerate(scores_list):
                     lines.append(
                         {
-                            "method_test_name": process_method_name(method_test),
+                            "method_test_name": method_test,
                             # Here we invert the heterogeneity level
                             "heterogeneity level": 1.0 - heterogeneity_method_params[k],
                             "score": score,
