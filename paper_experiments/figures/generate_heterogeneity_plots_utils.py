@@ -27,7 +27,7 @@ def sensitivity(
     log2fc_threshold: float | None,
 ) -> float:
     """
-    Compute the number of recovered positives.
+    Compute the number of recovered positives out of all true positives. A.k.a. recall.
 
     By recovered positives, we mean the fraction of differentially expressed genes
     found by the test method that are also found by the reference method, w.r.t. the
@@ -61,8 +61,7 @@ def sensitivity(
     Returns
     -------
     float
-        The sensitivity score, also known as recall
-        (i.e., the fraction of recovered positives).
+        The sensitivity score, also known as recall.
 
     """
     method_test_diff_genes = get_de_genes(
@@ -76,6 +75,65 @@ def sensitivity(
     false_negatives = len(set(method_ref_diff_genes) - set(method_test_diff_genes))
 
     return true_positives / (true_positives + false_negatives)
+
+
+def precision(
+    method_test_padj: pd.Series,
+    method_test_lfc: pd.Series,
+    method_ref_padj: pd.Series,
+    method_ref_lfc: pd.Series,
+    padj_threshold: float | None,
+    log2fc_threshold: float | None,
+) -> float:
+    """
+    Compute the number of true positives out of all predicted positives.
+
+    By true positives, we mean the fraction of differentially expressed genes
+    found by the test method that are also found by the reference method, w.r.t. the
+    differentially expressed genes found by the reference method.
+
+    We define the differentially expressed genes as the genes with an adjusted p-value
+    below a certain threshold and an absolute log fold change above a certain threshold.
+
+    Parameters
+    ----------
+    method_test_padj : pd.Series
+        The adjusted p-values of the test method, indexed by gene names.
+
+    method_test_lfc : pd.Series
+        The log fold changes of the test method, indexed by gene names,
+        *in natural scale*.
+
+    method_ref_padj : pd.Series
+        The adjusted p-values of the reference method, indexed by gene names.
+
+    method_ref_lfc : pd.Series
+        The log fold changes of the reference method, indexed by gene names,
+        *in natural scale*.
+
+    padj_threshold : float or None
+        The adjusted p-value threshold.
+
+    log2fc_threshold : float or None
+        The log2 fold change threshold.
+
+    Returns
+    -------
+    float
+        The precision score.
+
+    """
+    method_test_diff_genes = get_de_genes(
+        method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
+    )
+    method_ref_diff_genes = get_de_genes(
+        method_ref_padj, method_ref_lfc, padj_threshold, log2fc_threshold
+    )
+
+    true_positives = len(set(method_test_diff_genes) & set(method_ref_diff_genes))
+    false_positives = len(set(method_test_diff_genes) - set(method_ref_diff_genes))
+
+    return true_positives / (true_positives + false_positives)
 
 
 def f1_score(
@@ -282,6 +340,7 @@ SCORING_FUNCTIONS: dict[str, Callable] = {
     "sensitivity_0.05_2.0": partial(
         sensitivity, padj_threshold=0.05, log2fc_threshold=2.0
     ),
+    "precision_0.05_2.0": partial(precision, padj_threshold=0.05, log2fc_threshold=2.0),
     "f1_score_0.05_2.0": partial(f1_score, padj_threshold=0.05, log2fc_threshold=2.0),
     "pearson_correlation_pvalues": pearson_correlation_pvalues,
     "pearson_correlation_pvalues_7": partial(

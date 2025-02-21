@@ -44,6 +44,7 @@ plots:
     - "meta_analysis"
     - "pydeseq2_largest"
     scoring_function_names:
+    - "precision_0.05_2.0"
     - "sensitivity_0.05_2.0"
     - "f1_score_0.05_2.0"
     - "pearson_correlation_pvalues"
@@ -57,5 +58,5 @@ plots:
     - "meta_analysis"
     - "pydeseq2_largest"
     scoring_function_names:
+    - "precision_0.05_2.0"
     - "sensitivity_0.05_2.0"
-    - "f1_score_0.05_2.0"

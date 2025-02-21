@@ -27,7 +27,8 @@ NAME_MAPPING = {
 }
 
 SCORING_FUNCTIONS_YLABELS: dict[str, str] = {
-    "sensitivity_0.05_2.0": "Sensitivity",
+    "precision_0.05_2.0": "Precision",
+    "sensitivity_0.05_2.0": "Recall",
     "f1_score_0.05_2.0": "F1 score",
     "pearson_correlation_pvalues": "Pearson correlation of -log10(p-values)",
     "pearson_correlation_lfcs": "Pearson correlation of log fold changes",
