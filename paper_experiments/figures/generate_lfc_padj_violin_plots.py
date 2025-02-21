@@ -266,8 +266,8 @@ def make_lfc_or_padj_violin_plot(
 
     ax.tick_params(width=2)
 
-    plt.xticks(size=12, weight="bold")
-    plt.yticks(size=12, weight="bold")
+    plt.xticks(size=12)
+    plt.yticks(size=12)
 
     # Turn off x label
     plt.xlabel("")
