@@ -272,8 +272,6 @@ def make_lfc_or_padj_violin_plot(
     # Turn off x label
     plt.xlabel("")
 
-    # Set x tick labels to vertical
-    plt.xticks(rotation=90)
     if padj_or_lfc == "padj":
         plt.ylabel("FDR relative error", size=15)
     else:
