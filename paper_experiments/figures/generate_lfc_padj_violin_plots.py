@@ -194,7 +194,7 @@ def make_lfc_or_padj_violin_plot(
     """
     plt.clf()
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(8, 6))
 
     assert padj_or_lfc in ["lfc", "padj"]
 
