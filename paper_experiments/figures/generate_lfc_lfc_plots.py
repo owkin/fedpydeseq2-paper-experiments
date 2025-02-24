@@ -502,6 +502,7 @@ def make_lfc_lfc_plot(
 
         adjust_text(texts, arrowprops={"arrowstyle": "-", "color": "k"})
 
+    ax.set_aspect("equal")
     ax.get_legend().remove()
     if write_legend:
         if pydeseq2_padj is not None:
@@ -620,14 +621,11 @@ def make_lfc_lfc_plot(
     plt.xlabel("$log_{2}$ fold change (pydeseq2)", size=15)
     plt.ylabel(f"$log_{2}$ fold change ({plot_title})", size=15)
 
-    plt.gca().set_aspect("equal")
-
     plt.title(plot_title, size=16, weight="bold")
 
-    plt.tight_layout()
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_file_path, transparent=True)
+    plt.savefig(save_file_path, transparent=True, bbox_inches="tight")
     plt.close()
 
 
@@ -879,6 +877,8 @@ def make_padj_padj_plot(
         linewidth=2,
     )
 
+    ax.set_aspect("equal")
+
     if annotate_genes:
         texts = []
         for i in range(len(df)):
@@ -1018,8 +1018,7 @@ def make_padj_padj_plot(
 
     plt.title(plot_title, size=16, weight="bold")
 
-    plt.tight_layout()
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_file_path)
+    plt.savefig(save_file_path, transparent=True, bbox_inches="tight")
     plt.close()
