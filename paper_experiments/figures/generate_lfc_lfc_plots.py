@@ -620,6 +620,8 @@ def make_lfc_lfc_plot(
     plt.xlabel("$log_{2}$ fold change (pydeseq2)", size=15)
     plt.ylabel(f"$log_{2}$ fold change ({plot_title})", size=15)
 
+    plt.gca().set_aspect("equal")
+
     plt.title(plot_title, size=16, weight="bold")
 
     plt.tight_layout()
