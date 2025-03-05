@@ -94,6 +94,373 @@ def build_pan_cancer_confusion_matrix(
     """
     plt.clf()
 
+    n_datasets = len(dataset_names)
+
+    if method_test == "meta_analysis":
+        n_methods = 5  # Hardcoded for now
+
+        fig, axes = plt.subplots(
+            n_datasets,
+            n_methods,
+            figsize=(n_methods * 5, n_datasets * 4),
+            constrained_layout=True,
+        )
+
+        # Adjust colorbar position for the new layout
+        cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+
+        logger.info(
+            f"Building meta-analysis cross table for multiple methods vs {method_ref}"
+        )
+
+        for i, dataset_name in enumerate(dataset_names):
+            experiment_id = get_experiment_id(
+                dataset_name=dataset_name,
+                small_samples=small_samples,
+                small_genes=small_genes,
+                only_two_centers=only_two_centers,
+                design_factors=design_factors,
+                continuous_factors=continuous_factors,
+                **pydeseq2_kwargs,
+            )
+
+            refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
+
+            method_test_padj, method_test_lfc = get_padj_lfc_from_method(
+                method_test,
+                method_test_results_path,
+                experiment_id,
+                refit_cooks=refit_cooks,
+                reference_dds_ref_level=reference_dds_ref_level,
+                meta_analysis_parameters=meta_analysis_parameters,
+            )
+
+            method_ref_padj, method_ref_lfc = get_padj_lfc_from_method(
+                method_ref,
+                method_ref_results_path,
+                experiment_id,
+                refit_cooks=refit_cooks,
+                reference_dds_ref_level=reference_dds_ref_level,
+                meta_analysis_parameters=meta_analysis_parameters,
+            )
+
+            assert not isinstance(
+                method_ref_padj, dict
+            ), "Meta-analysis not supported as a reference method"
+            assert not isinstance(
+                method_ref_lfc, dict
+            ), "Meta-analysis not supported as a reference method"
+
+            # For each method in the test methods
+            for j, (method_id, method_test_padj_series) in enumerate(
+                method_test_padj.items()
+            ):
+                method_test_lfc_series = method_test_lfc[method_id]
+
+                method_test_up_reg_genes = method_test_padj_series[
+                    (method_test_padj_series < padj_threshold)
+                    & (method_test_lfc_series > np.log(2) * log2fc_threshold)
+                ].index
+                method_test_down_reg_genes = method_test_padj_series[
+                    (method_test_padj_series < padj_threshold)
+                    & (method_test_lfc_series < -np.log(2) * log2fc_threshold)
+                ].index
+
+                method_ref_up_reg_genes = method_ref_padj[
+                    (method_ref_padj < padj_threshold)
+                    & (method_ref_lfc > np.log(2) * log2fc_threshold)
+                ].index
+                method_ref_down_reg_genes = method_ref_padj[
+                    (method_ref_padj < padj_threshold)
+                    & (method_ref_lfc < -np.log(2) * log2fc_threshold)
+                ].index
+
+                method_ref_all_genes = method_ref_padj.index
+
+                ax = axes[i, j] if n_datasets > 1 and n_methods > 1 else axes[i]
+
+                confusion_matrix = build_33_confusion_matrix(
+                    set(method_test_up_reg_genes),
+                    set(method_test_down_reg_genes),
+                    set(method_ref_up_reg_genes),
+                    set(method_ref_down_reg_genes),
+                    set(method_ref_all_genes),
+                )
+
+                heatmap_matrix = build_33_heatmap_matrix(
+                    set(method_test_up_reg_genes),
+                    set(method_test_down_reg_genes),
+                    set(method_ref_up_reg_genes),
+                    set(method_ref_down_reg_genes),
+                    set(method_ref_all_genes),
+                )
+
+                sns.heatmap(
+                    heatmap_matrix,
+                    annot=confusion_matrix,
+                    fmt="g",
+                    vmin=0.0,
+                    vmax=1.0,
+                    cmap="viridis",
+                    linewidths=1.0,
+                    annot_kws={"size": 14},
+                    cbar_ax=cbar_ax if i == 0 and j == n_methods - 1 else None,
+                    cbar=i == 0 and j == n_methods - 1,
+                    ax=ax,
+                )
+
+                # Only add x-labels for bottom row
+                if i == n_datasets - 1:
+                    ax.set_xlabel(process_method_name(method_ref), fontsize=15)
+                    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=12)
+                else:
+                    ax.set_xlabel("")
+                    ax.set_xticklabels([])
+
+                # Only add y-labels for leftmost column
+                if j == 0:
+                    ax.set_ylabel(process_method_name(method_test), fontsize=15)
+                    ax.set_yticklabels(
+                        ["up-reg.", "none", "down-reg."], rotation=0, size=12
+                    )
+                else:
+                    ax.set_ylabel("")
+                    ax.set_yticklabels([])
+
+                # Add titles only to top row
+                if i == 0:
+                    ax.set_title(process_method_name(method_id), fontsize=16)
+
+                # Add dataset names to the right side
+                if j == n_methods - 1:
+                    ax.text(
+                        1.02,
+                        0.5,
+                        dataset_name,
+                        transform=ax.transAxes,
+                        rotation=-90,
+                        verticalalignment="center",
+                        fontsize=14,
+                    )
+
+        # Format colorbar
+        cbar_ax.tick_params(labelsize=14)
+        if hasattr(axes[0, -1].collections[0], "colorbar"):
+            cbar = axes[0, -1].collections[0].colorbar
+            cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
+
+    else:
+        fig, axes = plt.subplots(
+            2,
+            int(np.ceil(n_datasets / 2)),
+            figsize=(int(np.ceil(n_datasets / 2)) * 5, 8),
+            constrained_layout=True,
+        )
+        cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
+
+        logger.info(
+            f"Building pan-cancer cross table for {method_test} vs {method_ref}."
+        )
+
+        for i, dataset_name in enumerate(dataset_names):
+            experiment_id = get_experiment_id(
+                dataset_name=dataset_name,
+                small_samples=small_samples,
+                small_genes=small_genes,
+                only_two_centers=only_two_centers,
+                design_factors=design_factors,
+                continuous_factors=continuous_factors,
+                **pydeseq2_kwargs,
+            )
+
+            refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
+
+            method_test_padj, method_test_lfc = get_padj_lfc_from_method(
+                method_test,
+                method_test_results_path,
+                experiment_id,
+                refit_cooks=refit_cooks,
+                reference_dds_ref_level=reference_dds_ref_level,
+                meta_analysis_parameters=meta_analysis_parameters,
+            )
+
+            method_ref_padj, method_ref_lfc = get_padj_lfc_from_method(
+                method_ref,
+                method_ref_results_path,
+                experiment_id,
+                refit_cooks=refit_cooks,
+                reference_dds_ref_level=reference_dds_ref_level,
+                meta_analysis_parameters=meta_analysis_parameters,
+            )
+
+            assert not isinstance(method_test_padj, dict), (
+                "If the test method is not meta-analysis, the padj and lfc should "
+                "not be dictionaries"
+            )
+            assert not isinstance(method_test_lfc, dict), (
+                "If the test method is not meta-analysis, the padj and lfc should "
+                "not be dictionaries"
+            )
+
+            assert not isinstance(
+                method_ref_padj, dict
+            ), "Meta-analysis not supported as a reference method"
+            assert not isinstance(
+                method_ref_lfc, dict
+            ), "Meta-analysis not supported as a reference method"
+
+            method_test_up_reg_genes = method_test_padj[
+                (method_test_padj < padj_threshold)
+                & (method_test_lfc > np.log(2) * log2fc_threshold)
+            ].index
+            method_test_down_reg_genes = method_test_padj[
+                (method_test_padj < padj_threshold)
+                & (method_test_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+
+            method_ref_up_reg_genes = method_ref_padj[
+                (method_ref_padj < padj_threshold)
+                & (method_ref_lfc > np.log(2) * log2fc_threshold)
+            ].index
+            method_ref_down_reg_genes = method_ref_padj[
+                (method_ref_padj < padj_threshold)
+                & (method_ref_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+
+            method_ref_all_genes = method_ref_padj.index
+
+            # Check that the method_test are included
+            assert set(method_test_padj.index).issubset(method_ref_padj.index)
+
+            ax = axes.flatten()[i]
+
+            confusion_matrix = build_33_confusion_matrix(
+                set(method_test_up_reg_genes),
+                set(method_test_down_reg_genes),
+                set(method_ref_up_reg_genes),
+                set(method_ref_down_reg_genes),
+                set(method_ref_all_genes),
+            )
+
+            heatmap_matrix = build_33_heatmap_matrix(
+                set(method_test_up_reg_genes),
+                set(method_test_down_reg_genes),
+                set(method_ref_up_reg_genes),
+                set(method_ref_down_reg_genes),
+                set(method_ref_all_genes),
+            )
+            sns.heatmap(
+                heatmap_matrix,
+                annot=confusion_matrix,
+                fmt="g",
+                vmin=0.0,
+                vmax=1.0,
+                cmap="viridis",
+                linewidths=1.0,
+                annot_kws={"size": 14},
+                cbar_ax=cbar_ax,
+                ax=ax,
+            )
+
+            cbar = ax.collections[0].colorbar
+            cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
+
+            ax.set_xlabel(process_method_name(method_ref), fontsize=15)
+            ax.set_ylabel(process_method_name(method_test), fontsize=15)
+            ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=12)
+            ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=12)
+            ax.set_title(f"{dataset_name}", fontsize=16)
+
+    cbar_ax.tick_params(labelsize=14)
+
+    save_file_path = Path(save_file_path)
+    save_file_path = (
+        save_file_path / "pan_cancer" / f"cross_table_{method_test}_vs_{method_ref}.pdf"
+    )
+
+    save_file_path = Path(save_file_path)
+    save_file_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_file_path, bbox_inches="tight", transparent=True)
+    plt.close()
+
+
+def build_pan_cancer_confusion_matrix_old(
+    method_test,
+    method_ref,
+    method_test_results_path: str | Path,
+    method_ref_results_path: str | Path,
+    dataset_names: list[TCGADatasetNames],
+    save_file_path: str | Path,
+    small_samples: bool = False,
+    small_genes: bool = False,
+    only_two_centers: bool = False,
+    design_factors: str | list[str] = "stage",
+    continuous_factors: list[str] | None = None,
+    reference_dds_ref_level: tuple[str, str] | None = ("stage", "Advanced"),
+    meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
+    log2fc_threshold: float = 2.0,
+    padj_threshold: float = 0.05,
+    **pydeseq2_kwargs: Any,
+):
+    """
+    Make a pan-cancer confusion matrix between a test method and a reference method.
+
+    Represents confusion matrices sides by side for each dataset, with a common
+    colorbar.
+
+    Parameters
+    ----------
+    method_test : str
+        The tested method.
+
+    method_ref : str
+        The reference method.
+
+    method_test_results_path : str or Path
+        The path to the tested method results.
+
+    method_ref_results_path : str or Path
+        The path to the reference method results.
+
+    dataset_names : list[TCGADatasetNames]
+        The list of dataset to include in the figure.
+
+    save_file_path : str or Path
+        The path where to save the plot.
+
+    small_samples : bool
+        Whether to use small samples.
+
+    small_genes : bool
+        Whether to use small genes.
+
+    only_two_centers : bool
+        Whether to use only two centers.
+
+    design_factors : str or list[str]
+        The design factors used in the experiment.
+
+    continuous_factors : list[str] or None
+        The continuous factors used in the experiment.
+
+    reference_dds_ref_level : tuple[str, str] or None
+        The reference dds ref level to use.
+
+    meta_analysis_parameters : list[MetaAnalysisParameter] or None
+        The meta-analysis parameters to use.
+
+    log2fc_threshold : float
+        The log2-fold change threshold to define up and down regulated genes.
+
+    padj_threshold : float
+        The adjusted p-value threshold to define differentially expressed genes.
+
+    **pydeseq2_kwargs : Any
+        Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2
+        methods.
+    """
+    plt.clf()
+
     n = len(dataset_names)
 
     fig, axes = plt.subplots(
