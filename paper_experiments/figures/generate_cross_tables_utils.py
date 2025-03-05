@@ -608,10 +608,9 @@ def build_cross_table(
             ax=ax,
         )
 
-    plt.tight_layout()
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_file_path, transparent=True)
+    plt.savefig(save_file_path, transparent=True, bbox_inches="tight")
     plt.close()
 
 
