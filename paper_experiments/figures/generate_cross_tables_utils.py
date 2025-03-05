@@ -104,7 +104,7 @@ def build_pan_cancer_confusion_matrix(
             n_methods,
             n_datasets,
             figsize=(n_datasets * 5, n_methods * 4),
-            gridspec_kw={"hspace": 0.2, "wspace": 0.2},
+            gridspec_kw={"hspace": 0.1, "wspace": 0.1},
             constrained_layout=True,
         )
 
@@ -213,7 +213,7 @@ def build_pan_cancer_confusion_matrix(
 
                 # Add dataset name to top row plots
                 if i == 0:
-                    ax.set_title(dataset_name, fontsize=20, pad=10)
+                    ax.set_title(dataset_name, fontsize=25, pad=10)
 
                 # Only add x-labels for bottom row
                 if i == n_methods - 1:
