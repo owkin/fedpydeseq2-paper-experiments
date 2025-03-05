@@ -206,10 +206,13 @@ def build_pan_cancer_confusion_matrix(
                     cmap="viridis",
                     linewidths=1.0,
                     annot_kws={"size": 14},
-                    cbar_ax=cbar_ax if i == 0 and j == n_methods - 1 else None,
-                    cbar=i == 0 and j == n_methods - 1,
+                    cbar_ax=cbar_ax,
                     ax=ax,
                 )
+
+                # Add dataset name to top row plots
+                if i == 0:
+                    ax.set_title(dataset_name, fontsize=15, pad=10)
 
                 # Only add x-labels for bottom row
                 if i == n_datasets - 1:
