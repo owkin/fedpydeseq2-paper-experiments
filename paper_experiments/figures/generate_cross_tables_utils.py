@@ -592,8 +592,6 @@ def build_cross_table(
                 ax=axes[i],
                 cbar_ax=cbar_ax,
             )
-            cbar = axes[i].collections[0].colorbar
-            cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
     else:
         assert method_test_name is not None
         fig, ax = plt.subplots(figsize=(8, 8))
@@ -721,6 +719,10 @@ def build_cross_table_on_ax(
         annot_kws={"size": 14},
         cbar_ax=cbar_ax,
     )
+
+    if cbar_ax is not None:
+        cbar = ax.collections[0].colorbar
+        cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
 
     ax.set_xlabel(method_ref_name, fontsize=16)
     ax.set_ylabel(method_test_name, fontsize=16)
