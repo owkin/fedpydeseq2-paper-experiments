@@ -99,21 +99,23 @@ def build_pan_cancer_confusion_matrix(
     if method_test == "meta_analysis":
         n_methods = 5  # Hardcoded for now
 
+        # Invert rows and columns in the subplot creation
         fig, axes = plt.subplots(
-            n_datasets,
             n_methods,
-            figsize=(n_methods * 5, n_datasets * 4),
+            n_datasets,
+            figsize=(n_datasets * 5, n_methods * 4),
             constrained_layout=True,
         )
 
         # Adjust colorbar position for the new layout
-        cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+        cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
 
         logger.info(
             f"Building meta-analysis cross table for multiple methods vs {method_ref}"
         )
 
-        for i, dataset_name in enumerate(dataset_names):
+        # Iterate over datasets first (columns)
+        for j, dataset_name in enumerate(dataset_names):
             experiment_id = get_experiment_id(
                 dataset_name=dataset_name,
                 small_samples=small_samples,
@@ -151,8 +153,8 @@ def build_pan_cancer_confusion_matrix(
                 method_ref_lfc, dict
             ), "Meta-analysis not supported as a reference method"
 
-            # For each method in the test methods
-            for j, (method_id, method_test_padj_series) in enumerate(
+            # Then iterate over methods (rows)
+            for i, (method_id, method_test_padj_series) in enumerate(
                 method_test_padj.items()
             ):
                 method_test_lfc_series = method_test_lfc[method_id]
@@ -219,29 +221,13 @@ def build_pan_cancer_confusion_matrix(
 
                 # Only add y-labels for leftmost column
                 if j == 0:
-                    ax.set_ylabel(process_method_name(method_test), fontsize=15)
+                    ax.set_ylabel(process_method_name(method_id), fontsize=15)
                     ax.set_yticklabels(
                         ["up-reg.", "none", "down-reg."], rotation=0, size=12
                     )
                 else:
                     ax.set_ylabel("")
                     ax.set_yticklabels([])
-
-                # Add titles only to top row
-                if i == 0:
-                    ax.set_title(process_method_name(method_id), fontsize=16)
-
-                # Add dataset names to the right side
-                if j == n_methods - 1:
-                    ax.text(
-                        1.02,
-                        0.5,
-                        dataset_name,
-                        transform=ax.transAxes,
-                        rotation=-90,
-                        verticalalignment="center",
-                        fontsize=14,
-                    )
 
         # Format colorbar
         cbar_ax.tick_params(labelsize=14)
@@ -262,7 +248,8 @@ def build_pan_cancer_confusion_matrix(
             f"Building pan-cancer cross table for {method_test} vs {method_ref}."
         )
 
-        for i, dataset_name in enumerate(dataset_names):
+        # Iterate over datasets first (columns)
+        for j, dataset_name in enumerate(dataset_names):
             experiment_id = get_experiment_id(
                 dataset_name=dataset_name,
                 small_samples=small_samples,
@@ -332,7 +319,7 @@ def build_pan_cancer_confusion_matrix(
             # Check that the method_test are included
             assert set(method_test_padj.index).issubset(method_ref_padj.index)
 
-            ax = axes.flatten()[i]
+            ax = axes.flatten()[j]
 
             confusion_matrix = build_33_confusion_matrix(
                 set(method_test_up_reg_genes),
