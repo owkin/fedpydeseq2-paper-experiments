@@ -576,6 +576,7 @@ def build_cross_table(
         assert set(method_test_padj.keys()) == set(method_test_LFC.keys())
         n_methods = len(method_test_padj)
         fig, axes = plt.subplots(1, n_methods, figsize=(n_methods * 8, 8), sharey=True)
+        cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
         for i, method_id in enumerate(sorted(method_test_padj.keys())):
             center_padj = method_test_padj[method_id]
             build_cross_table_on_ax(
@@ -589,7 +590,10 @@ def build_cross_table(
                 method_test_name=process_method_name(method_id),
                 method_ref_name=method_ref_name,
                 ax=axes[i],
+                cbar_ax=cbar_ax,
             )
+        cbar = axes[i].collections[0].colorbar
+        cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
     else:
         assert method_test_name is not None
         fig, ax = plt.subplots(figsize=(8, 8))
@@ -624,6 +628,7 @@ def build_cross_table_on_ax(
     method_test_name: str,
     method_ref_name: str,
     ax: plt.Axes,
+    cbar_ax: plt.Axes | None = None,
 ):
     """
     Build a 3x3 confusion matrix between a test method and a reference method.
@@ -661,6 +666,9 @@ def build_cross_table_on_ax(
 
     ax : plt.Axes
         The matplotlib axes where to plot the confusion matrix
+
+    cbar_ax : plt.Axes or None
+        The matplotlib axes where to plot the colorbar.
 
     """
     method_test_up_reg_genes = method_test_padj[
@@ -711,7 +719,9 @@ def build_cross_table_on_ax(
         vmin=0.0,
         vmax=1.0,
         annot_kws={"size": 14},
+        cbar_ax=cbar_ax,
     )
+
     ax.set_xlabel(method_ref_name, fontsize=16)
     ax.set_ylabel(method_test_name, fontsize=16)
     ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=14)
