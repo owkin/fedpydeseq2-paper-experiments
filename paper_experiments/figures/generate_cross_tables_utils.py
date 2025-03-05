@@ -576,7 +576,7 @@ def build_cross_table(
         assert set(method_test_padj.keys()) == set(method_test_LFC.keys())
         n_methods = len(method_test_padj)
         fig, axes = plt.subplots(1, n_methods, figsize=(n_methods * 8, 8), sharey=True)
-        cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
+        cbar_ax = fig.add_axes([0.92, 0.2, 0.02, 0.6])
         for i, method_id in enumerate(sorted(method_test_padj.keys())):
             center_padj = method_test_padj[method_id]
             build_cross_table_on_ax(
