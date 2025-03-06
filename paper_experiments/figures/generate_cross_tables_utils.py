@@ -211,24 +211,29 @@ def build_pan_cancer_confusion_matrix(
                     ax=ax,
                 )
 
+                # Remove ticks for all plots
+                ax.tick_params(left=False, bottom=False)
+
                 # Add dataset name to top row plots
                 if i == 0:
                     ax.set_title(dataset_name, fontsize=25, pad=10)
 
-                # Only add x-labels for bottom row
+                # Handle bottom row
                 if i == n_methods - 1:
                     ax.set_xlabel(process_method_name(method_ref), fontsize=20)
                     ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=15)
+                    ax.tick_params(bottom=True)  # Show ticks only for bottom row
                 else:
                     ax.set_xlabel("")
                     ax.set_xticklabels([])
 
-                # Only add y-labels for leftmost column
+                # Handle leftmost column
                 if j == 0:
                     ax.set_ylabel(process_method_name(method_id), fontsize=20)
                     ax.set_yticklabels(
                         ["up-reg.", "none", "down-reg."], rotation=0, size=15
                     )
+                    ax.tick_params(left=True)  # Show ticks only for left column
                 else:
                     ax.set_ylabel("")
                     ax.set_yticklabels([])
