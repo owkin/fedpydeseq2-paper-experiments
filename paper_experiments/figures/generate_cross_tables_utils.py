@@ -216,7 +216,7 @@ def build_pan_cancer_confusion_matrix(
 
                 # Add dataset name to top row plots
                 if i == 0:
-                    ax.set_title(dataset_name, fontsize=30, pad=10, weight="bold")
+                    ax.set_title(dataset_name, fontsize=30, pad=10)
 
                 # Handle bottom row
                 if i == n_methods - 1:
@@ -239,7 +239,7 @@ def build_pan_cancer_confusion_matrix(
                     ax.set_yticklabels([])
 
         # Format colorbar
-        cbar_ax.tick_params(labelsize=20)
+        cbar_ax.tick_params(labelsize=25)
         if hasattr(axes[0, -1].collections[0], "colorbar"):
             cbar = axes[0, -1].collections[0].colorbar
             cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
