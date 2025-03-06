@@ -206,7 +206,7 @@ def build_pan_cancer_confusion_matrix(
                     vmax=1.0,
                     cmap="viridis",
                     linewidths=1.0,
-                    annot_kws={"size": 14},
+                    annot_kws={"size": 20},
                     cbar_ax=cbar_ax,
                     ax=ax,
                 )
@@ -216,12 +216,12 @@ def build_pan_cancer_confusion_matrix(
 
                 # Add dataset name to top row plots
                 if i == 0:
-                    ax.set_title(dataset_name, fontsize=25, pad=10)
+                    ax.set_title(dataset_name, fontsize=30, pad=10, weight="bold")
 
                 # Handle bottom row
                 if i == n_methods - 1:
-                    ax.set_xlabel(process_method_name(method_ref), fontsize=20)
-                    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=15)
+                    ax.set_xlabel(process_method_name(method_ref), fontsize=25)
+                    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=20)
                     ax.tick_params(bottom=True)  # Show ticks only for bottom row
                 else:
                     ax.set_xlabel("")
@@ -229,9 +229,9 @@ def build_pan_cancer_confusion_matrix(
 
                 # Handle leftmost column
                 if j == 0:
-                    ax.set_ylabel(process_method_name(method_id), fontsize=20)
+                    ax.set_ylabel(process_method_name(method_id), fontsize=25)
                     ax.set_yticklabels(
-                        ["up-reg.", "none", "down-reg."], rotation=0, size=15
+                        ["up-reg.", "none", "down-reg."], rotation=0, size=20
                     )
                     ax.tick_params(left=True)  # Show ticks only for left column
                 else:
@@ -239,7 +239,7 @@ def build_pan_cancer_confusion_matrix(
                     ax.set_yticklabels([])
 
         # Format colorbar
-        cbar_ax.tick_params(labelsize=15)
+        cbar_ax.tick_params(labelsize=20)
         if hasattr(axes[0, -1].collections[0], "colorbar"):
             cbar = axes[0, -1].collections[0].colorbar
             cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
