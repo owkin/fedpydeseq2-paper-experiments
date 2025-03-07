@@ -239,10 +239,10 @@ def build_pan_cancer_confusion_matrix(
                     ax.set_yticklabels([])
 
         # Format colorbar
-        cbar_ax.tick_params(labelsize=25)
         if hasattr(axes[0, -1].collections[0], "colorbar"):
             cbar = axes[0, -1].collections[0].colorbar
             cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
+            cbar.ax.tick_params(labelsize=20)
 
     else:
         fig, axes = plt.subplots(
@@ -367,7 +367,7 @@ def build_pan_cancer_confusion_matrix(
             ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=12)
             ax.set_title(f"{dataset_name}", fontsize=16)
 
-    cbar_ax.tick_params(labelsize=14)
+        cbar_ax.tick_params(labelsize=14)
 
     save_file_path = Path(save_file_path)
     save_file_path = (
