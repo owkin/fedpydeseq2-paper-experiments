@@ -184,14 +184,32 @@ def add_function_block(
             if block.local
             else function_node_colors["aggregator"]
         )
-        # Add the function block node to the Digraph
-        dot.node(
-            f"func_{block.remote_id}",
-            f"{block.name}",
-            shape="box",
-            style="filled",
-            fillcolor=color,
-        )
+
+        # If at first level and flattening is enabled, create an invisible subgraph
+        if depth == 1 and flatten_first_depth:
+            sub = Digraph(name=f"cluster_{block.remote_id}")
+            sub.attr(style="invis", color="white", label="")
+
+            # Add the function block node to the subgraph
+            sub.node(
+                f"func_{block.remote_id}",
+                f"{block.name}",
+                shape="box",
+                style="filled",
+                fillcolor=color,
+            )
+            # Add the subgraph to the main graph
+            dot.subgraph(sub)
+        else:
+            # Add the function block node directly to the Digraph
+            dot.node(
+                f"func_{block.remote_id}",
+                f"{block.name}",
+                shape="box",
+                style="filled",
+                fillcolor=color,
+            )
+
         state_to_func: dict[int, int] = {}
         func_to_state: dict[int, int] = {}
         # Connect with input shared state if specified
@@ -475,53 +493,65 @@ def create_workflow_graph(
     shared_state_naming: Literal["id", "content"] = "id",
     render: bool = True,
     shared_state_mapping: dict[int, int] | None = None,
+    formats: list[Literal["png", "eps", "pdf", "svg"]] | None = None,
 ) -> tuple[set[int], set[int], set[tuple[int, int]]]:
     """Create a workflow graph from shared states and function blocks.
 
     This function generates a workflow graph using Graphviz,
-    representing the relationships
-    between shared states and function blocks.
-     It can render the graph to a specified path
-    and allows customization of various parameters.
+    representing the relationships between shared states and function blocks.
+    It can render the graph to a specified path and allows customization
+    of various parameters.
 
     Parameters
     ----------
     shared_states : list[SharedState]
         A list of shared states. Each SharedState object contains
-        information about the state,
-        including its items, type, shape, and description.
+        information about the state, including its items, type,
+        shape, and description.
+
     function_blocks : list[FunctionBlock]
         A list of function blocks. Each FunctionBlock object
-        represents a block of functions
-        in the workflow.
-    render_path : str or None, optional
-        The path to render the graph to, by default None. If None,
-        the graph is not saved to a file.
-    max_depth : int or None, optional
-        The maximum depth to plot, by default None. If None,
-        there is no depth limit.
-    function_block_name : str or None, optional
+        represents a block of functions in the workflow.
+
+    render_path : str | None, optional
+        The path to render the graph to, by default None.
+        If None, the graph is not saved to a file.
+
+    max_depth : int | None, optional
+        The maximum depth to plot, by default None.
+        If None, there is no depth limit.
+
+    function_block_name : str | None, optional
         The name of the function block to plot, by default None.
         If None, the first function block is used.
+
     rank : int, optional
         The rank to search for, by default 0.
+
     flatten_first_depth : bool, optional
         Whether to flatten the first depth, by default True.
+
     shared_state_naming : Literal["id", "content"], optional
         The naming convention for shared states, by default "id".
         If "id", shared states are named by their IDs.
         If "content", shared states are named by their content.
+
     render : bool, optional
         Whether to render the graph, by default True.
-    shared_state_mapping : dict[int, int] or None, optional
+
+    shared_state_mapping : dict[int, int] | None, optional
         A mapping from shared state IDs to new IDs, by default None.
+
+    formats : list[Literal["png", "eps", "pdf", "svg"]] | None, optional
+        The output formats for the rendered graph, by default ["eps", "png"].
+        Supported formats include "png", "eps", "pdf", "svg".
 
     Returns
     -------
     tuple[set[int], set[int], set[tuple[int, int]]]
         A tuple containing sets of added states, functions, blocks,
-        and dictionaries mapping shared state IDs
-        to function IDs and vice versa.
+        and dictionaries mapping shared state IDs to function IDs
+        and vice versa.
         - The first set contains the IDs of the added shared states.
         - The second set contains the IDs of the added functions.
         - The third set contains tuples representing the start and end
@@ -532,22 +562,15 @@ def create_workflow_graph(
     ValueError
         If the specified function block name is not found in
         the list of function blocks.
-
-    Notes
-    -----
-    - The function initializes the initial and final
-      shared states and adds them to the graph.
-    - It creates a fake subgraph for the initial and
-      final shared states to ensure proper visualization.
-    - The function block is added to the graph,
-      and edges are created to connect the shared states and functions.
-    - The graph can be rendered to a specified path
-      if the render parameter is set to True.
     """
     dot = Digraph(comment="Workflow Graph")
     dot.attr(
         splines="ortho", ratio="compress", fontsize="10", nodesep="0.1", ranksep="0.25"
     )
+
+    # Set default formats if None
+    if formats is None:
+        formats = ["eps", "png"]
 
     # Find the function block by name if provided
     if function_block_name is not None:
@@ -630,7 +653,8 @@ def create_workflow_graph(
     states_info.add(final_shared_state_idx)
 
     # Render the graph if required
-    if render:
-        dot.render(render_path, format="png")
+    for format in formats:
+        if render:
+            dot.render(render_path, format=format)
 
     return (states_info, funcs_info, blocks_info)

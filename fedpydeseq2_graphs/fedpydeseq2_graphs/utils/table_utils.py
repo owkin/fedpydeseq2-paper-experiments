@@ -4,6 +4,9 @@ import yaml  # type: ignore
 
 from fedpydeseq2_graphs.constants import DESCRIPTIONS_PATH
 from fedpydeseq2_graphs.utils.data_classes import SharedState
+from fedpydeseq2_graphs.utils.markdown_table_utils import (
+    convert_latex_table_to_markdown,
+)
 
 CLASS_MAPPING = {
     "int": "int",
@@ -61,7 +64,7 @@ ALIASES = {
             "local_features": "nactive_genes",
             "local_hat_matrix": (
                 "nactive_genes",
-                {64: "nnonzerogenes", 121: "nnonzerogenes", 123: "nnonzerogenes"},
+                {64: "nnonzero_genes", 121: "nnonzero_genes", 123: "nnonzero_genes"},
             ),
             "local_nll": "nactive_genes",
             "irls_gene_names": "nactive_genes",
@@ -190,57 +193,44 @@ def create_table_from_dico(
     shared_state_mapping: dict[int, int] | None = None,
     colsep: str = "0.75",
     parsize: str = "6",
-) -> tuple[str, pd.DataFrame]:
-    """Create a LaTeX table and a DataFrame from the shared states dictionary.
+    markdown_output_path: str | None = None,
+) -> tuple[str, str, pd.DataFrame]:
+    """Create LaTeX and Markdown tables from the shared states dictionary.
 
-    This function generates a LaTeX table and a pandas DataFrame from a
+    This function generates both LaTeX and Markdown tables from a
     dictionary of shared states.
     The table can be filtered based on whether the states are shared
     with an aggregator, and the IDs
-    can be updated using a provided mapping. The resulting table is
-    formatted for LaTeX output with
-    customizable column separation and paragraph size.
+    can be updated using a provided mapping.
 
     Parameters
     ----------
     shared_states : dict[int, SharedState]
-        A dictionary mapping IDs to SharedState objects. Each SharedState
-        object contains information
-        about the state, including its items, type, shape, and description.
+        A dictionary mapping IDs to SharedState objects.
     shared_with_aggregator : Optional[bool], optional
         If specified, filters the table to include only states that match
         the shared_with_aggregator field.
-        By default, None, which includes all states regardless of this field.
     shared_state_mapping : dict[int, int] or None, optional
-        A mapping from original shared state IDs to new IDs. If provided,
-        the table will be restricted to
-        the shared states in the mapping, and the IDs will be updated
-        accordingly. By default, None.
+        A mapping from original shared state IDs to new IDs.
     colsep : str, optional
-        The column separation value for LaTeX formatting. By default, "0.75".
+        The column separation value for LaTeX formatting.
     parsize : str, optional
-        The paragraph size for LaTeX formatting. By default, "6".
+        The paragraph size for LaTeX formatting.
+    markdown_output_path : str, optional
+        Path where to save the markdown version of the table.
+        If None, markdown table is not saved to file.
 
     Returns
     -------
     tuple[str, pd.DataFrame]
         A tuple containing:
         - A string representing the LaTeX table.
+        - A string representing the Markdown table.
         - A pandas DataFrame containing the table data.
 
     Notes
     -----
-    - The function reads descriptions from a YAML file specified by
-      DESCRIPTIONS_PATH.
-    - The table is sorted by the "ID" column.
-    - Rows with old IDs in TRIMMED_MEAN_IDS and names "0" or "1" are
-      removed and replaced with a
-      template row indicating a trimmed mean.
-    - The description column is updated based on the descriptions file.
-    - The DataFrame is formatted for LaTeX output, with special handling
-      for column names and shapes.
-    - The LaTeX table is formatted as a longtable with customizable column
-      separation and paragraph size.
+    The function requires LATEX_COMMANDS_PATH to be set globally before use.
     """
     with open(DESCRIPTIONS_PATH) as f:
         descriptions = yaml.safe_load(f)
@@ -361,9 +351,18 @@ def create_table_from_dico(
     df["Type"] = df["Type"].apply(lambda x: x.replace("_", r"\_"))
     # Transform Shared with aggregator column to a Shared with column
     if shared_with_aggregator is None:
-        df = df.rename(columns={"Shared with aggregator": "Shared with"})
+        df = df.rename(columns={"Shared with aggregator": "Sent to"})
         # map true to "Central server" and False to "Center" and nan to "All"
-        df["Shared with"] = df["Shared with"].map(
+        df["Computed by"] = df["Sent to"].map(
+            {
+                True: "Each center",
+                False: "Server",
+                pd.NA: "Server",
+                np.nan: "Server",
+                None: "Server",
+            }
+        )
+        df["Sent to"] = df["Sent to"].map(
             {True: "Server", False: "Center", pd.NA: "All", np.nan: "All", None: "All"}
         )
 
@@ -372,21 +371,64 @@ def create_table_from_dico(
 
     df.set_index(["ID", "Name"], inplace=True)
 
+    # Reorder the columns
+    df = df[["Type", "Shape", "Description", "Computed by", "Sent to"]]
     latex_table = df.to_latex()
     # replace \begin{tabular} with \begin{longtable}
     latex_table = latex_table.replace("tabular", "longtable")
+
     # Set the second to last column to be a ptype column
     latex_table = latex_table.replace(
-        "llllll",
+        "lllllll",
         (
             "l @{\\hspace{colsepfrac\\tabcolsep}}"
             "l@{\\hspace{colsepfrac\\tabcolsep}}l@{\\hspace{colsepfrac\\tabcolsep}}"
             "l@{\\hspace{colsepfrac\\tabcolsep}}"
-            "p{parsizecm}@{\\hspace{colsepfrac\\tabcolsep}}l"
+            "p{parsizecm}@{\\hspace{colsepfrac\\tabcolsep}}ll"
         )
         .replace("colsepfrac", colsep)
         .replace("parsize", parsize),
     )
+
+    # Add row colors to each row after the header
+    lines = latex_table.split("\n")
+    current_color = "lightblue"
+    data_row_started = False
+
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        if line.startswith("\\midrule"):
+            data_row_started = True
+            i += 1
+            continue
+        elif (
+            line.startswith("\\toprule")
+            or line.startswith("\\bottomrule")
+            or line == ""
+        ):
+            i += 1
+            continue
+        elif not data_row_started:
+            i += 1
+            continue
+
+        # For any data row (multirow or regular), add the color
+        if not line.startswith("\\") or line.startswith(
+            "\\multirow"
+        ):  # Skip lines that start with LaTeX commands except for \multirow
+            lines[i] = f"\\rowcolor{{{current_color}}}" + lines[i]
+            current_color = "white" if current_color == "lightblue" else "lightblue"
+        i += 1
+
+    latex_table = "\n".join(lines)
+
     # Add \begin{tiny} and \end{tiny} around the table
     latex_table = "\\begin{tiny}\n" + latex_table + "\n\\end{tiny}"
-    return latex_table, df_to_save
+
+    # After creating the LaTeX table, generate markdown version if commands path is set
+    markdown_table = convert_latex_table_to_markdown(
+        latex_table,
+    )
+
+    return latex_table, markdown_table, df_to_save

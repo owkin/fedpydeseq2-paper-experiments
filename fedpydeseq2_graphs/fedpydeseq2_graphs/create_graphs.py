@@ -1,6 +1,7 @@
 import pathlib
 import pickle
 from pathlib import Path
+from typing import Literal
 
 import yaml  # type: ignore
 
@@ -36,6 +37,7 @@ def create_workflow_graph_and_tables(
     function_block_name: str | None = None,
     rank: int = 0,
     flatten_first_depth: bool = True,
+    formats: list[Literal["png", "eps", "pdf", "svg"]] | None = None,
 ):
     """Create workflow graphs and tables from shared states and blocks.
 
@@ -69,6 +71,9 @@ def create_workflow_graph_and_tables(
     flatten_first_depth : bool, optional
         Whether to flatten the first depth of the graph, by default True.
 
+    formats : list[Literal["png", "eps", "pdf", "svg"]] | None, optional
+        The formats to save the graphs in, by default None.
+
     Returns
     -------
     None
@@ -91,6 +96,10 @@ def create_workflow_graph_and_tables(
     graphs_dir = workflow_dir / "graphs"
     graphs_dir.mkdir(exist_ok=True, parents=True)
 
+    # Set default formats if None
+    if formats is None:
+        formats = ["eps", "png"]
+
     # Create the initial version of the workflow graph
     nodes_info = create_workflow_graph(
         shared_states=shared_states_list,
@@ -102,6 +111,7 @@ def create_workflow_graph_and_tables(
         render=False,
         shared_state_mapping=None,
         rank=rank,
+        formats=formats,
     )
 
     # Create a mapping from shared state IDs to new IDs
@@ -122,6 +132,7 @@ def create_workflow_graph_and_tables(
         shared_state_mapping=old_ids_to_new_ids,
         rank=rank,
         flatten_first_depth=flatten_first_depth,
+        formats=formats,
     )
 
     # Create the workflow graph with shared_state_naming="content"
@@ -135,10 +146,11 @@ def create_workflow_graph_and_tables(
         render=True,
         shared_state_mapping=None,
         flatten_first_depth=flatten_first_depth,
+        formats=formats,
     )
 
     # Create a table from the shared states and save it in CSV and LaTeX formats
-    table, df = create_table_from_dico(
+    table, md_table, df = create_table_from_dico(
         shared_states,
         shared_with_aggregator=None,
         shared_state_mapping=old_ids_to_new_ids,
@@ -151,6 +163,8 @@ def create_workflow_graph_and_tables(
         f.write(description_str)
     with open(tables_dir / "shared.tex", "w") as f:
         f.write(table)
+    with open(tables_dir / "shared.md", "w") as f:
+        f.write(md_table)
 
 
 def main():
@@ -186,6 +200,7 @@ def main():
             max_depth=max_depth,
             rank=rank,
             flatten_first_depth=flatten_first_depth,
+            formats=["eps", "png"],
         )
 
 
