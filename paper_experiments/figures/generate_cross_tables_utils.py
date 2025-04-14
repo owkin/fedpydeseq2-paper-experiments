@@ -1,4 +1,3 @@
-import math
 from pathlib import Path
 from typing import Any
 from typing import cast
@@ -1007,27 +1006,15 @@ def build_33_heatmap_matrix(
 
     heatmap_matrix = np.zeros((3, 3))
     heatmap_matrix[0, 0] = matrix[0, 0] / len(method_ref_up_genes)
-    heatmap_matrix[0, 1] = matrix[0, 1] / math.sqrt(
-        len(method_ref_up_genes) * len(method_ref_none_genes)
-    )
-    heatmap_matrix[0, 2] = matrix[0, 2] / math.sqrt(
-        len(method_ref_up_genes) * len(method_ref_down_genes)
-    )
+    heatmap_matrix[0, 1] = matrix[0, 1] / len(method_ref_up_genes)
+    heatmap_matrix[0, 2] = matrix[0, 2] / len(method_ref_up_genes)
 
-    heatmap_matrix[1, 0] = matrix[1, 0] / math.sqrt(
-        len(method_ref_up_genes) * len(method_ref_none_genes)
-    )
+    heatmap_matrix[1, 0] = matrix[1, 0] / len(method_ref_none_genes)
     heatmap_matrix[1, 1] = matrix[1, 1] / len(method_ref_none_genes)
-    heatmap_matrix[1, 2] = matrix[1, 2] / math.sqrt(
-        len(method_ref_down_genes) * len(method_ref_none_genes)
-    )
+    heatmap_matrix[1, 2] = matrix[1, 2] / len(method_ref_none_genes)
 
-    heatmap_matrix[2, 0] = matrix[2, 0] / math.sqrt(
-        len(method_ref_up_genes) * len(method_ref_down_genes)
-    )
-    heatmap_matrix[2, 1] = matrix[2, 1] / math.sqrt(
-        len(method_ref_none_genes) * len(method_ref_down_genes)
-    )
+    heatmap_matrix[2, 0] = matrix[2, 0] / len(method_ref_down_genes)
+    heatmap_matrix[2, 1] = matrix[2, 1] / len(method_ref_down_genes)
     heatmap_matrix[2, 2] = matrix[2, 2] / len(method_ref_down_genes)
 
     return heatmap_matrix
