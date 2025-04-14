@@ -351,7 +351,7 @@ def build_pan_cancer_confusion_matrix(
                 for j in range(confusion_matrix.shape[1]):
                     count = confusion_matrix[i, j]
                     pct = heatmap_matrix[i, j] * 100
-                    annot_matrix[i, j] = f"{count}\n({pct:.1f}%)"
+                    annot_matrix[i, j] = f"$\\mathbf{{{count:d}}}$\n{pct:.1f}%"
 
             sns.heatmap(
                 heatmap_matrix,
