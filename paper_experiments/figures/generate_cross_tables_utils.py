@@ -199,11 +199,11 @@ def build_pan_cancer_confusion_matrix(
 
                 # Create annotation text with both count and percentage
                 annot_matrix = np.empty_like(confusion_matrix, dtype=object)
-                for i in range(confusion_matrix.shape[0]):
-                    for j in range(confusion_matrix.shape[1]):
-                        count = confusion_matrix[i, j]
-                        pct = heatmap_matrix[i, j] * 100
-                        annot_matrix[i, j] = f"$\\mathbf{{{count:.0f}}}$\n{pct:.1f}%"
+                for ii in range(confusion_matrix.shape[0]):
+                    for jj in range(confusion_matrix.shape[1]):
+                        count = confusion_matrix[ii, jj]
+                        pct = heatmap_matrix[ii, jj] * 100
+                        annot_matrix[ii, jj] = f"$\\mathbf{{{count:.0f}}}$\n{pct:.1f}%"
 
                 sns.heatmap(
                     heatmap_matrix,
