@@ -106,6 +106,52 @@ def run_plot_pipe(
 
     plots_config = config["plots"]
 
+    if "pancancer_cross_table" in plots_config:
+        pancancer_table_config = plots_config["pancancer_cross_table"]
+        pancancer_table_path = plot_results_path / "pancancer_tables"
+        pancancer_table_path.mkdir(parents=True, exist_ok=True)
+        log2fc_threshold = pancancer_table_config.get("log2fc_threshold", 2.0)
+        padj_threshold = pancancer_table_config.get("padj_threshold", 0.05)
+        method_pairs_in_config = pancancer_table_config["method_pairs"]
+        ref_with_heterogeneity = pancancer_table_config.get(
+            "ref_with_heterogeneity", False
+        )
+        # Method pairs is a list of list of string, convert to list of tuples
+        method_pairs = [
+            (method_pair[0], method_pair[1]) for method_pair in method_pairs_in_config
+        ]
+        all_methods = list(
+            {method for method_pair in method_pairs for method in method_pair}
+        )
+        # Check that the methods are in the list of methods to run
+        method_results_paths = get_dge_methods_paths(
+            all_methods=all_methods,
+            dge_results_path=dge_results_path,
+            paths=paths,
+            dge_methods_to_run=dge_methods_to_run,
+        )
+
+        for method_test, method_ref in method_pairs:
+            build_pan_cancer_confusion_matrix(
+                method_test=method_test,
+                method_ref=method_ref,
+                method_test_results_path=method_results_paths[method_test],
+                method_ref_results_path=method_results_paths[method_ref],
+                save_file_path=pancancer_table_path,
+                dataset_names=dataset_names,
+                small_samples=False,
+                small_genes=False,
+                only_two_centers=only_two_centers,
+                design_factors=design_factors,
+                continuous_factors=continuous_factors,
+                reference_dds_ref_level=("stage", "Advanced"),
+                meta_analysis_parameters=meta_analysis_parameters,
+                ref_with_heterogeneity=ref_with_heterogeneity,
+                log2fc_threshold=log2fc_threshold,
+                padj_threshold=padj_threshold,
+                **pydeseq2_kwargs,
+            )
+
     if "heterogeneity_grid" in plots_config:
         heterogeneity_plots_config = plots_config["heterogeneity_grid"]
         heterogeneity_plots_path = plot_results_path / "heterogeneity_grid"
@@ -223,52 +269,6 @@ def run_plot_pipe(
                 heterogeneity_method=heterogeneity_method,
                 heterogeneity_method_param=heterogeneity_method_param,
                 **plot_kwargs,
-                **pydeseq2_kwargs,
-            )
-
-    if "pancancer_cross_table" in plots_config:
-        pancancer_table_config = plots_config["pancancer_cross_table"]
-        pancancer_table_path = plot_results_path / "pancancer_tables"
-        pancancer_table_path.mkdir(parents=True, exist_ok=True)
-        log2fc_threshold = pancancer_table_config.get("log2fc_threshold", 2.0)
-        padj_threshold = pancancer_table_config.get("padj_threshold", 0.05)
-        method_pairs_in_config = pancancer_table_config["method_pairs"]
-        ref_with_heterogeneity = pancancer_table_config.get(
-            "ref_with_heterogeneity", False
-        )
-        # Method pairs is a list of list of string, convert to list of tuples
-        method_pairs = [
-            (method_pair[0], method_pair[1]) for method_pair in method_pairs_in_config
-        ]
-        all_methods = list(
-            {method for method_pair in method_pairs for method in method_pair}
-        )
-        # Check that the methods are in the list of methods to run
-        method_results_paths = get_dge_methods_paths(
-            all_methods=all_methods,
-            dge_results_path=dge_results_path,
-            paths=paths,
-            dge_methods_to_run=dge_methods_to_run,
-        )
-
-        for method_test, method_ref in method_pairs:
-            build_pan_cancer_confusion_matrix(
-                method_test=method_test,
-                method_ref=method_ref,
-                method_test_results_path=method_results_paths[method_test],
-                method_ref_results_path=method_results_paths[method_ref],
-                save_file_path=pancancer_table_path,
-                dataset_names=dataset_names,
-                small_samples=False,
-                small_genes=False,
-                only_two_centers=only_two_centers,
-                design_factors=design_factors,
-                continuous_factors=continuous_factors,
-                reference_dds_ref_level=("stage", "Advanced"),
-                meta_analysis_parameters=meta_analysis_parameters,
-                ref_with_heterogeneity=ref_with_heterogeneity,
-                log2fc_threshold=log2fc_threshold,
-                padj_threshold=padj_threshold,
                 **pydeseq2_kwargs,
             )
 
