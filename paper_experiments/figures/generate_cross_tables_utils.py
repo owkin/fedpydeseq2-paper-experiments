@@ -690,7 +690,7 @@ def build_dataset_comparison_cross_table(
     ), "Method results should not be a dictionary"
 
     # Get common genes between datasets
-    common_genes = set(dataset1_padj.index).intersection(set(dataset2_padj.index))
+    common_genes = dataset1_padj.index.intersection(dataset2_padj.index)
 
     # Filter to common genes
     dataset1_padj = dataset1_padj[common_genes]
