@@ -748,7 +748,7 @@ def build_dataset_comparison_cross_table(
         vmax=1,
         linewidths=1.0,
         linecolor="black",
-        annot_kws={"size": 12},
+        annot_kws={"size": 16},
         ax=ax,
         cbar=False,
     )
