@@ -736,7 +736,7 @@ def build_dataset_comparison_cross_table(
     for i in range(confusion_matrix.shape[0]):
         for j in range(confusion_matrix.shape[1]):
             count = confusion_matrix[i, j]
-            annot_matrix[i, j] = f"$\\mathbf{{{count:.0f}}}$"
+            annot_matrix[i, j] = f"{count:.0f}"
 
     # Plot heatmap without colors
     sns.heatmap(
