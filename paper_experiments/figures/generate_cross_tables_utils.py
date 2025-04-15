@@ -572,6 +572,235 @@ def build_test_vs_ref_cross_table(
     )
 
 
+def build_dataset_comparison_cross_table(
+    method: str,
+    method_results_path: str | Path,
+    dataset1_name: TCGADatasetNames,
+    dataset2_name: TCGADatasetNames,
+    save_file_path: str | Path,
+    small_samples: bool = False,
+    small_genes: bool = False,
+    only_two_centers: bool = False,
+    design_factors: str | list[str] = "stage",
+    continuous_factors: list[str] | None = None,
+    reference_dds_ref_level: tuple[str, str] | None = ("stage", "Advanced"),
+    log2fc_threshold: float = 2.0,
+    padj_threshold: float = 0.05,
+    **pydeseq2_kwargs: Any,
+):
+    """
+    Build a cross table comparing DEGs between two datasets using the same method.
+
+    Parameters
+    ----------
+    method : str
+        The method used for differential expression analysis.
+
+    method_results_path : str | Path
+        Path to the method results.
+
+    dataset1_name : TCGADatasetNames
+        Name of the first TCGA dataset.
+
+    dataset2_name : TCGADatasetNames
+        Name of the second TCGA dataset.
+
+    save_file_path : str | Path
+        Path where to save the cross table plot.
+
+    small_samples : bool
+        Whether to use small samples.
+
+    small_genes : bool
+        Whether to use small genes.
+
+    only_two_centers : bool
+        Whether to use only two centers.
+
+    design_factors : str | list[str]
+        Design factors to use.
+
+    continuous_factors : list[str] | None
+        Continuous factors to use.
+
+    reference_dds_ref_level : tuple[str, str] | None
+        The reference dds ref level to use.
+
+    log2fc_threshold : float
+        The log2-fold change threshold to define up and down regulated genes.
+
+    padj_threshold : float
+        The adjusted p-value threshold to define differentially expressed genes.
+
+    **pydeseq2_kwargs : Any
+        Additional keyword arguments to pass to the PyDESeq2 method.
+    """
+    # Get experiment IDs for both datasets
+    experiment_id1 = get_experiment_id(
+        dataset_name=dataset1_name,
+        small_samples=small_samples,
+        small_genes=small_genes,
+        only_two_centers=only_two_centers,
+        design_factors=design_factors,
+        continuous_factors=continuous_factors,
+        **pydeseq2_kwargs,
+    )
+
+    experiment_id2 = get_experiment_id(
+        dataset_name=dataset2_name,
+        small_samples=small_samples,
+        small_genes=small_genes,
+        only_two_centers=only_two_centers,
+        design_factors=design_factors,
+        continuous_factors=continuous_factors,
+        **pydeseq2_kwargs,
+    )
+
+    # Get results for both datasets
+    refit_cooks = pydeseq2_kwargs.get("refit_cooks", True)
+
+    dataset1_padj, dataset1_lfc = get_padj_lfc_from_method(
+        method,
+        method_results_path,
+        experiment_id1,
+        refit_cooks=refit_cooks,
+        reference_dds_ref_level=reference_dds_ref_level,
+    )
+
+    dataset2_padj, dataset2_lfc = get_padj_lfc_from_method(
+        method,
+        method_results_path,
+        experiment_id2,
+        refit_cooks=refit_cooks,
+        reference_dds_ref_level=reference_dds_ref_level,
+    )
+
+    # Ensure we're working with Series, not dictionaries
+    assert not isinstance(
+        dataset1_padj, dict
+    ), "Method results should not be a dictionary"
+    assert not isinstance(
+        dataset1_lfc, dict
+    ), "Method results should not be a dictionary"
+    assert not isinstance(
+        dataset2_padj, dict
+    ), "Method results should not be a dictionary"
+    assert not isinstance(
+        dataset2_lfc, dict
+    ), "Method results should not be a dictionary"
+
+    # Get common genes between datasets
+    common_genes = set(dataset1_padj.index).intersection(set(dataset2_padj.index))
+
+    # Filter to common genes
+    dataset1_padj = dataset1_padj[common_genes]
+    dataset1_lfc = dataset1_lfc[common_genes]
+    dataset2_padj = dataset2_padj[common_genes]
+    dataset2_lfc = dataset2_lfc[common_genes]
+
+    # Create the plot
+    plt.clf()
+    fig, ax = plt.subplots(figsize=(8, 8))
+
+    # Build cross table
+    confusion_matrix = build_33_confusion_matrix(
+        method_1_up_genes=set(
+            dataset1_padj[
+                (dataset1_padj < padj_threshold)
+                & (dataset1_lfc > np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_1_down_genes=set(
+            dataset1_padj[
+                (dataset1_padj < padj_threshold)
+                & (dataset1_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_2_up_genes=set(
+            dataset2_padj[
+                (dataset2_padj < padj_threshold)
+                & (dataset2_lfc > np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_2_down_genes=set(
+            dataset2_padj[
+                (dataset2_padj < padj_threshold)
+                & (dataset2_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        all_genes=set(common_genes),
+    )
+
+    heatmap_matrix = build_33_heatmap_matrix(
+        method_test_up_genes=set(
+            dataset1_padj[
+                (dataset1_padj < padj_threshold)
+                & (dataset1_lfc > np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_test_down_genes=set(
+            dataset1_padj[
+                (dataset1_padj < padj_threshold)
+                & (dataset1_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_ref_up_genes=set(
+            dataset2_padj[
+                (dataset2_padj < padj_threshold)
+                & (dataset2_lfc > np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        method_ref_down_genes=set(
+            dataset2_padj[
+                (dataset2_padj < padj_threshold)
+                & (dataset2_lfc < -np.log(2) * log2fc_threshold)
+            ].index
+        ),
+        all_genes=set(common_genes),
+    )
+
+    # Create annotation text with both count and percentage
+    annot_matrix = np.empty_like(confusion_matrix, dtype=object)
+    for i in range(confusion_matrix.shape[0]):
+        for j in range(confusion_matrix.shape[1]):
+            count = confusion_matrix[i, j]
+            pct = heatmap_matrix[i, j] * 100
+            annot_matrix[i, j] = f"$\\mathbf{{{count:.0f}}}$\n{pct:.1f}%"
+
+    # Plot heatmap
+    sns.heatmap(
+        heatmap_matrix,
+        annot=annot_matrix,
+        fmt="",
+        vmin=0.0,
+        vmax=1.0,
+        cmap="viridis",
+        linewidths=1.0,
+        annot_kws={"size": 12},
+        ax=ax,
+    )
+
+    # Customize plot
+    ax.set_xlabel(dataset2_name, fontsize=16)
+    ax.set_ylabel(dataset1_name, fontsize=16)
+    ax.set_xticklabels(["up-reg.", "none", "down-reg."], size=14)
+    ax.set_yticklabels(["up-reg.", "none", "down-reg."], rotation=0, size=14)
+    ax.set_title(
+        f"DEGs comparison between {dataset1_name} and {dataset2_name}", fontsize=16
+    )
+
+    # Add colorbar with percentage formatter
+    cbar = ax.collections[0].colorbar
+    cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
+    cbar.ax.tick_params(labelsize=14)
+
+    # Save plot
+    save_file_path = Path(save_file_path)
+    save_file_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(save_file_path, bbox_inches="tight", transparent=True)
+    plt.close()
+
+
 def build_test_vs_ref_cross_tables(
     method_pairs: list[tuple[str, str]],
     method_results_paths: dict[str, Path],

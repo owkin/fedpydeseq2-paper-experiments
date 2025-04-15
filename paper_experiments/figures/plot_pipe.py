@@ -7,6 +7,9 @@ from fedpydeseq2_datasets.constants import TCGADatasetNames
 from loguru import logger
 
 from paper_experiments.figures.generate_cross_tables_utils import (
+    build_dataset_comparison_cross_table,
+)
+from paper_experiments.figures.generate_cross_tables_utils import (
     build_pan_cancer_confusion_matrix,
 )
 from paper_experiments.figures.generate_cross_tables_utils import (
@@ -105,6 +108,39 @@ def run_plot_pipe(
     dataset_names = [cast(TCGADatasetNames, dataset) for dataset in datasets]
 
     plots_config = config["plots"]
+
+    if "datasets_cross_table_config" in plots_config:
+        datasets_cross_table_config = plots_config["datasets_cross_table_config"]
+        datasets_cross_table_path = plot_results_path / "datasets_cross_tables"
+        datasets_cross_table_path.mkdir(parents=True, exist_ok=True)
+        log2fc_threshold = datasets_cross_table_config.get("log2fc_threshold", 2.0)
+        padj_threshold = datasets_cross_table_config.get("padj_threshold", 0.05)
+        dataset_pairs_in_config = datasets_cross_table_config["dataset_pairs"]
+        ref_with_heterogeneity = datasets_cross_table_config.get(
+            "ref_with_heterogeneity", False
+        )
+        # Check that the methods are in the list of methods to run
+        method_results_paths = get_dge_methods_paths(
+            all_methods=["pydeseq2"],
+            dge_results_path=dge_results_path,
+            paths=paths,
+            dge_methods_to_run=dge_methods_to_run,
+        )
+        for dataset1_name, dataset2_name in dataset_pairs_in_config:
+            build_dataset_comparison_cross_table(
+                method="pydeseq2",
+                method_results_path=method_results_paths["pydeseq2"],
+                dataset1_name=dataset1_name,
+                dataset2_name=dataset2_name,
+                save_file_path=datasets_cross_table_path
+                / f"cross_table_{dataset1_name}_vs_{dataset2_name}.pdf",
+                design_factors=design_factors,
+                continuous_factors=continuous_factors,
+                reference_dds_ref_level=("stage", "Advanced"),
+                log2fc_threshold=log2fc_threshold,
+                padj_threshold=padj_threshold,
+                **pydeseq2_kwargs,
+            )
 
     if "pancancer_cross_table" in plots_config:
         pancancer_table_config = plots_config["pancancer_cross_table"]
