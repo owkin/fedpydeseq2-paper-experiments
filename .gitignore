@@ -173,3 +173,7 @@ credentials/*
 !credentials/dataset-datasamples-keys-template.yaml
 fedpydeseq2_remote_scripts/*
 !fedpydeseq2_remote_scripts/.gitkeep
+fedpydeseq2_graphs/paths.yaml
+fedpydeseq2_graphs/config.yaml
+
+fedpydeseq2_graphs/local-worker/*

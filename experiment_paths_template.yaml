@@ -2,21 +2,21 @@ experiments:
   single_factor:
     results: ""
     remote_results: null
-    remote_processed : null
-    remote_credentials : null
+    remote_processed: null
+    remote_credentials: null
   multi_factor:
     results: ""
     remote_results: null
-    remote_processed : null
-    remote_credentials : null
+    remote_processed: null
+    remote_credentials: null
   continuous_factor:
     results: ""
     remote_results: null
-    remote_processed : null
-    remote_credentials : null
+    remote_processed: null
+    remote_credentials: null
   heterogeneity:
     results: ""
     remote_results: null
-    remote_processed : null
-    remote_credentials : null
+    remote_processed: null
+    remote_credentials: null
 raw_data_path: ""

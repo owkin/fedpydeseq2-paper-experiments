@@ -35,8 +35,7 @@ def get_padj_lfc_fedpydeseq2(
     fedpydeseq2_results_path: str | Path,
     experiment_id: str,
 ) -> tuple[pd.Series, pd.Series]:
-    """
-    Get the adjusted p-values and log-fold changes from a fedpydeseq2 result file.
+    """Get the adjusted p-values and log-fold changes from a file.
 
     Parameters
     ----------
@@ -53,7 +52,6 @@ def get_padj_lfc_fedpydeseq2(
 
     fl_LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     result_file_path = Path(fedpydeseq2_results_path, experiment_id, "fl_result.pkl")
 
@@ -76,8 +74,7 @@ def get_padj_lfc_pydeseq2(
     ground_truth_dds_name: str,
     center: int | None = None,
 ) -> tuple[pd.Series, pd.Series]:
-    """
-    Get the adjusted p-values and log-fold changes from a pydeseq2 result file.
+    """Get the adjusted p-values and log-fold changes from a file.
 
     Parameters
     ----------
@@ -100,7 +97,6 @@ def get_padj_lfc_pydeseq2(
 
     LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     pydeseq2_results_path = Path(pydeseq2_results_path)
     if center is None:
@@ -130,8 +126,7 @@ def get_padj_lfc_meta_analysis(
     experiment_id: str,
     meta_analysis_id: str,
 ):
-    """
-    Get the adjusted p-values and log-fold changes from a meta-analysis result file.
+    """Get the adjusted p-values and log-fold changes from a result file.
 
     Parameters
     ----------
@@ -151,7 +146,6 @@ def get_padj_lfc_meta_analysis(
 
     meta_LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     meta_analysis_results_path = Path(meta_analysis_results_path)
     stats_result_path = (
@@ -173,8 +167,7 @@ def get_padj_lfc_from_method(
     reference_dds_ref_level: tuple[str, str] | None = ("stage", "Advanced"),
     meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
 ) -> tuple[pd.Series | dict[str, pd.Series], pd.Series | dict[str, pd.Series]]:
-    """
-    Get the adjusted p-values and log-fold changes from a DGE method result file.
+    """Get the adjusted p-values and log-fold changes from a file.
 
     Parameters
     ----------
@@ -215,7 +208,6 @@ def get_padj_lfc_from_method(
     ------
     ValueError
         If the DGE method is unknown.
-
     """
     dge_method_results_path = Path(dge_method_results_path)
     if dge_method.startswith("fedpydeseq2"):
@@ -325,8 +317,7 @@ def build_pan_cancer_confusion_matrix(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Make a pan-cancer confusion matrix between a test method and a reference method.
+    """Make a pan-cancer confusion matrix between test and ref method.
 
     Represents confusion matrices sides by side for each dataset, with a common
     colorbar.
@@ -392,11 +383,9 @@ def build_pan_cancer_confusion_matrix(
         figsize=(int(np.ceil(n / 2)) * 5, 8),
         constrained_layout=True,
     )
-    cbar_ax = fig.add_axes([1.01, 0.2, 0.02, 0.6])
+    cbar_ax = fig.add_axes((1.01, 0.2, 0.02, 0.6))
 
-    logger.info(
-        f"Building pan-cacer cross table for {method_test} vs " f"{method_ref}."
-    )
+    logger.info(f"Building pan-cacer cross table for {method_test} vs {method_ref}.")
 
     for i, dataset_name in enumerate(dataset_names):
         experiment_id = get_experiment_id(
@@ -532,8 +521,7 @@ def build_test_vs_ref_cross_table(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build a cross table between a test method and a reference method.
+    """Build a cross table between a test method and a reference method.
 
     Parameters
     ----------
@@ -605,7 +593,6 @@ def build_test_vs_ref_cross_table(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2
         methods.
-
     """
     # set experiment id
     test_experiment_id = get_experiment_id(
@@ -659,12 +646,12 @@ def build_test_vs_ref_cross_table(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
-    assert not (
-        isinstance(method_ref_padj, dict)
-    ), "Reference method should not be per center nor meta-analysis"
-    assert not (
-        isinstance(method_ref_lfc, dict)
-    ), "Reference method should not be per center nor meta-analysis"
+    assert not (isinstance(method_ref_padj, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
+    assert not (isinstance(method_ref_lfc, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
 
     save_file_path = (
         cross_table_save_path
@@ -706,8 +693,7 @@ def build_test_vs_ref_cross_tables(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build cross tables for a list of test-reference method pairs.
+    """Build cross tables for a list of test-reference method pairs.
 
     Parameters
     ----------
@@ -774,7 +760,6 @@ def build_test_vs_ref_cross_tables(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2.
         For example the contrast parameter.
-
     """
     if isinstance(ref_with_heterogeneity, bool):
         ref_with_heterogeneity = [ref_with_heterogeneity] * len(method_pairs)
@@ -821,8 +806,7 @@ def build_cross_table(
     method_test_name: str | None,
     method_ref_name: str,
 ):
-    """
-    Build a 3x3 confusion matrix between a test method and a reference method.
+    """Build a 3x3 confusion matrix between test and ref method.
 
     The confusion matrix is normalized by columns, i.e., w.r.t. the reference method.
 
@@ -858,8 +842,6 @@ def build_cross_table(
 
     method_ref_name : str
         The name of the reference method.
-
-
     """
     plt.clf()
     if isinstance(method_test_padj, dict):
@@ -884,6 +866,10 @@ def build_cross_table(
     else:
         assert method_test_name is not None
         fig, ax = plt.subplots(figsize=(8, 8))
+        assert isinstance(method_test_LFC, pd.Series)
+        assert isinstance(method_test_padj, pd.Series)
+        assert isinstance(method_ref_LFC, pd.Series)
+        assert isinstance(method_ref_padj, pd.Series)
         build_cross_table_on_ax(
             method_test_padj=method_test_padj,
             method_test_LFC=method_test_LFC,
@@ -916,8 +902,7 @@ def build_cross_table_on_ax(
     method_ref_name: str,
     ax: plt.Axes,
 ):
-    """
-    Build a 3x3 confusion matrix between a test method and a reference method.
+    """Build a 3x3 confusion matrix between a test and reference method.
 
     The confusion matrix is normalized by columns, i.e., w.r.t. the reference method.
 
@@ -952,7 +937,6 @@ def build_cross_table_on_ax(
 
     ax : plt.Axes
         The matplotlib axes where to plot the confusion matrix
-
     """
     method_test_up_reg_genes = method_test_padj[
         (method_test_padj < padj_threshold)
@@ -1017,8 +1001,7 @@ def build_33_confusion_matrix(
     method_2_down_genes: set,
     all_genes: set,
 ):
-    """
-    Build a 3x3 confusion matrix.
+    """Build a 3x3 confusion matrix.
 
     Parameters
     ----------
@@ -1069,8 +1052,7 @@ def build_33_heatmap_matrix(
     method_ref_down_genes: set,
     all_genes: set,
 ):
-    """
-    Build a 3x3 heatmap matrix.
+    """Build a 3x3 heatmap matrix.
 
     This heatmap matrix computest the following formula:
     len(

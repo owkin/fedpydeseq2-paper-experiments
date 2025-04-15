@@ -1,4 +1,5 @@
 """Run PyDESeq2."""
+
 import os
 import pickle
 import tempfile
@@ -29,8 +30,7 @@ def run_tcga_pooled_experiments(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Run the TCGA experiments with pooled data.
+    """Run the TCGA experiments with pooled data.
 
     Parameters
     ----------
@@ -89,8 +89,6 @@ def run_tcga_pooled_experiments(
 
     **pydeseq2_kwargs : Any
         Any other keyword arguments to pass to the PyDESeq2 strategy
-
-
     """
     with tempfile.TemporaryDirectory() as processed_data_path_str:
         processed_data_path = Path(processed_data_path_str)
@@ -172,8 +170,7 @@ def create_and_save_pydeseq2_stats_results(
     stats_res_file: Path,
     center_id: int | None = None,
 ):
-    """
-    Create and save the PyDESeq2 stats results.
+    """Create and save the PyDESeq2 stats results.
 
     We save the results in a dictionary with the following
     keys:
@@ -205,7 +202,6 @@ def create_and_save_pydeseq2_stats_results(
     center_id : int or None
         The center id
         For logging purposes
-
     """
     with open(dds_filepath, "rb") as f:
         dds = pickle.load(f)

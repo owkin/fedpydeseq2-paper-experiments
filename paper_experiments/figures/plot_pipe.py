@@ -422,7 +422,9 @@ def get_dge_methods_paths(
     paths: dict,
     dge_methods_to_run: list[str],
 ) -> dict:
-    """Get the paths to the results of the differential gene expression methods.
+    """Get the paths to the results of the DGE methods.
+
+    DGE stands for Differential Gene Expression.
 
     Parameters
     ----------
@@ -444,7 +446,6 @@ def get_dge_methods_paths(
     dict
         A dictionary containing the paths to the results of the
         differential gene expression methods.
-
     """
     # Check that the methods are in the list of methods to run
     for method in all_methods:
