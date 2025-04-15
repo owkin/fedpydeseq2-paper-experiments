@@ -731,53 +731,23 @@ def build_dataset_comparison_cross_table(
         all_genes=set(common_genes),
     )
 
-    heatmap_matrix = build_33_heatmap_matrix(
-        method_test_up_genes=set(
-            dataset1_padj[
-                (dataset1_padj < padj_threshold)
-                & (dataset1_lfc > np.log(2) * log2fc_threshold)
-            ].index
-        ),
-        method_test_down_genes=set(
-            dataset1_padj[
-                (dataset1_padj < padj_threshold)
-                & (dataset1_lfc < -np.log(2) * log2fc_threshold)
-            ].index
-        ),
-        method_ref_up_genes=set(
-            dataset2_padj[
-                (dataset2_padj < padj_threshold)
-                & (dataset2_lfc > np.log(2) * log2fc_threshold)
-            ].index
-        ),
-        method_ref_down_genes=set(
-            dataset2_padj[
-                (dataset2_padj < padj_threshold)
-                & (dataset2_lfc < -np.log(2) * log2fc_threshold)
-            ].index
-        ),
-        all_genes=set(common_genes),
-    )
-
-    # Create annotation text with both count and percentage
+    # Create annotation text with counts
     annot_matrix = np.empty_like(confusion_matrix, dtype=object)
     for i in range(confusion_matrix.shape[0]):
         for j in range(confusion_matrix.shape[1]):
             count = confusion_matrix[i, j]
-            pct = heatmap_matrix[i, j] * 100
-            annot_matrix[i, j] = f"$\\mathbf{{{count:.0f}}}$\n{pct:.1f}%"
+            annot_matrix[i, j] = f"$\\mathbf{{{count:.0f}}}$"
 
-    # Plot heatmap
+    # Plot heatmap without colors
     sns.heatmap(
-        heatmap_matrix,
+        confusion_matrix,
         annot=annot_matrix,
         fmt="",
-        vmin=0.0,
-        vmax=1.0,
-        cmap="viridis",
+        cmap="Whites",
         linewidths=1.0,
         annot_kws={"size": 12},
         ax=ax,
+        cbar=False,
     )
 
     # Customize plot
