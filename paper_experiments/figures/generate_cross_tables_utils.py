@@ -743,7 +743,7 @@ def build_dataset_comparison_cross_table(
         confusion_matrix,
         annot=annot_matrix,
         fmt="",
-        cmap="Whites",
+        cmap="none",
         linewidths=1.0,
         annot_kws={"size": 12},
         ax=ax,
