@@ -83,7 +83,7 @@ PQN_mask:
   "18_44_88_113": A boolean array indicating which non zero genes are currently being optimized by the Proximal Quasi-Newton algorithm (active genes). The genes which have diverged during the IRLS algorithm and those which have not converged at the end of the prescribed iterations are set to $\true$.
   "19_45_89_114": A boolean array indicating which non zero genes are currently being optimized by the Proximal Quasi-Newton algorithm (active genes),  passed on without modification.
   "20_22_46_48_90_92_115_117": A boolean array indicating which non zero genes are currently being optimized by the Proximal Quasi-Newton algorithm (active genes),  passed on without modification.
-  "21_47_91_116": A boolean array indicating which non zero genes are currently being optimized by the Proximal Quasi-Newton algorithm (active genes). Genes that had converged with the relative error criterion or diverged (no stepsize satisfying the Armijo condition) have set to $\false.
+  "21_47_91_116": A boolean array indicating which non zero genes are currently being optimized by the Proximal Quasi-Newton algorithm (active genes). Genes that had converged with the relative error criterion or diverged (no stepsize satisfying the Armijo condition) have set to $\false$.
 global_reg_nll:
   "18_44_88_113": The regularized negative log likelihood of the negative binomial GLM with fixed dispersion at the $\beta_g$ parameter, intialized at $\texttt{np.nan}$ since no nll has been computed at this stage.
   "19_45_89_114": The regularized negative log likelihood of the negative binomial GLM with fixed dispersion at the $\beta_g$ parameter, computed as the sum of the local negative log likelihoods with $L^2$ regularization with $\lambda = 10^{-6}$.
