@@ -761,11 +761,6 @@ def build_dataset_comparison_cross_table(
         f"DEGs comparison between {dataset1_name} and {dataset2_name}", fontsize=16
     )
 
-    # Add colorbar with percentage formatter
-    cbar = ax.collections[0].colorbar
-    cbar.ax.yaxis.set_major_formatter(PercentFormatter(1, 0))
-    cbar.ax.tick_params(labelsize=14)
-
     # Save plot
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
