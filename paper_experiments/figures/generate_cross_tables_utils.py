@@ -747,6 +747,7 @@ def build_dataset_comparison_cross_table(
         vmin=1,  # Setting both vmin and vmax to 1 makes it all white
         vmax=1,
         linewidths=1.0,
+        linecolor="black",
         annot_kws={"size": 12},
         ax=ax,
         cbar=False,
