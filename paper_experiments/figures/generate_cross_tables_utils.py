@@ -743,7 +743,9 @@ def build_dataset_comparison_cross_table(
         confusion_matrix,
         annot=annot_matrix,
         fmt="",
-        cmap="none",
+        cmap="binary",  # Using binary colormap
+        vmin=1,  # Setting both vmin and vmax to 1 makes it all white
+        vmax=1,
         linewidths=1.0,
         annot_kws={"size": 12},
         ax=ax,
