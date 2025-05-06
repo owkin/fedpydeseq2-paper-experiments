@@ -54,8 +54,7 @@ SCORING_FUNCTIONS_YLABELS: dict[str, str] = {
 
 
 def process_method_name(method_name: str) -> str:
-    """
-    Make method name more readable.
+    """Make method name more readable.
 
     Parameters
     ----------
@@ -66,7 +65,6 @@ def process_method_name(method_name: str) -> str:
     -------
     str
         The processed method name.
-
     """
     if method_name.startswith("Meta-analysis"):
         # Extract the meta-analysis submethod name in a more readable format
@@ -82,8 +80,7 @@ def get_padj_lfc_fedpydeseq2(
     fedpydeseq2_results_path: str | Path,
     experiment_id: str,
 ) -> tuple[pd.Series, pd.Series]:
-    """
-    Get the adjusted p-values and log-fold changes from a fedpydeseq2 result file.
+    """Get the adjusted p-values and log-fold changes from a fedpydeseq2 result file.
 
     Parameters
     ----------
@@ -100,7 +97,6 @@ def get_padj_lfc_fedpydeseq2(
 
     fl_LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     result_file_path = Path(fedpydeseq2_results_path, experiment_id, "fl_result.pkl")
 
@@ -123,8 +119,7 @@ def get_padj_lfc_pydeseq2(
     ground_truth_dds_name: str,
     center: int | None = None,
 ) -> tuple[pd.Series, pd.Series]:
-    """
-    Get the adjusted p-values and log-fold changes from a pydeseq2 result file.
+    """Get the adjusted p-values and log-fold changes from a pydeseq2 result file.
 
     Parameters
     ----------
@@ -147,7 +142,6 @@ def get_padj_lfc_pydeseq2(
 
     LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     pydeseq2_results_path = Path(pydeseq2_results_path)
     if center is None:
@@ -177,8 +171,7 @@ def get_padj_lfc_meta_analysis(
     experiment_id: str,
     meta_analysis_id: str,
 ):
-    """
-    Get the adjusted p-values and log-fold changes from a meta-analysis result file.
+    """Get the adjusted p-values and log-fold changes from a meta-analysis result file.
 
     Parameters
     ----------
@@ -198,7 +191,6 @@ def get_padj_lfc_meta_analysis(
 
     meta_LFC : pd.Series
         The log-fold changes, *in natural scale*.
-
     """
     meta_analysis_results_path = Path(meta_analysis_results_path)
     stats_result_path = (
@@ -220,8 +212,7 @@ def get_padj_lfc_from_method(
     reference_dds_ref_level: tuple[str, str] | None = ("stage", "Advanced"),
     meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
 ) -> tuple[pd.Series | dict[str, pd.Series], pd.Series | dict[str, pd.Series]]:
-    """
-    Get the adjusted p-values and log-fold changes from a DGE method result file.
+    """Get the adjusted p-values and log-fold changes from a DGE method result file.
 
     Parameters
     ----------
@@ -262,7 +253,6 @@ def get_padj_lfc_from_method(
     ------
     ValueError
         If the DGE method is unknown.
-
     """
     dge_method_results_path = Path(dge_method_results_path)
     if dge_method.startswith("fedpydeseq2"):
@@ -360,8 +350,7 @@ def get_de_genes(
     padj_threshold: float | None,
     log2fc_threshold: float | None,
 ) -> pd.Index:
-    """
-    Get the differentially expressed genes.
+    """Get the differentially expressed genes.
 
     We define the differentially expressed genes as the genes with an adjusted p-value
     below a certain threshold and an absolute log fold change above a certain threshold.
@@ -384,7 +373,6 @@ def get_de_genes(
     -------
     pd.Index
         The differentially expressed genes.
-
     """
     # Initialize a boolean series to True
     condition = pd.Series(True, index=method_padj.index)

@@ -26,8 +26,7 @@ def sensitivity(
     padj_threshold: float | None,
     log2fc_threshold: float | None,
 ) -> float:
-    """
-    Compute the number of recovered positives out of all true positives. A.k.a. recall.
+    """Compute the number of recovered positives out of all true positives.
 
     By recovered positives, we mean the fraction of differentially expressed genes
     found by the test method that are also found by the reference method, w.r.t. the
@@ -62,7 +61,6 @@ def sensitivity(
     -------
     float
         The sensitivity score, also known as recall.
-
     """
     method_test_diff_genes = get_de_genes(
         method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
@@ -85,8 +83,7 @@ def precision(
     padj_threshold: float | None,
     log2fc_threshold: float | None,
 ) -> float:
-    """
-    Compute the number of true positives out of all predicted positives.
+    """Compute the number of true positives out of all predicted positives.
 
     By true positives, we mean the fraction of differentially expressed genes
     found by the test method that are also found by the reference method, w.r.t. the
@@ -121,7 +118,6 @@ def precision(
     -------
     float
         The precision score.
-
     """
     method_test_diff_genes = get_de_genes(
         method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
