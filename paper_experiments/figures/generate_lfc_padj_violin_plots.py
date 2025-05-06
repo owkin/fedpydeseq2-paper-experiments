@@ -10,9 +10,8 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.scale import SymmetricalLogScale
 
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
@@ -192,7 +191,7 @@ def make_lfc_or_padj_violin_plot(
     """
     plt.clf()
 
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(8, 6))
 
     assert padj_or_lfc in ["lfc", "padj"]
 
@@ -250,6 +249,12 @@ def make_lfc_or_padj_violin_plot(
         ),
     )
 
+    # Change the x-axis labels
+    ax.set_xticklabels(
+        [process_method_name(method_name) for method_name in df["method"].unique()]
+    )
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+
     for axis in ["bottom", "left"]:
         ax.spines[axis].set_linewidth(2)
 
@@ -258,14 +263,12 @@ def make_lfc_or_padj_violin_plot(
 
     ax.tick_params(width=2)
 
-    plt.xticks(size=12, weight="bold")
-    plt.yticks(size=12, weight="bold")
+    plt.xticks(size=12)
+    plt.yticks(size=12)
 
     # Turn off x label
     plt.xlabel("")
 
-    # Set x tick labels to vertical
-    plt.xticks(rotation=90)
     if padj_or_lfc == "padj":
         plt.ylabel("FDR relative error", size=15)
     else:

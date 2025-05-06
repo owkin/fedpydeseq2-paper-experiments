@@ -11,52 +11,11 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib import pyplot as plt
 
-from paper_experiments.figures.generate_cross_tables_utils import NAME_MAPPING
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import SCORING_FUNCTIONS_YLABELS
+from paper_experiments.figures.utils import get_de_genes
+from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
-
-
-def get_de_genes(
-    method_padj: pd.Series,
-    method_lfc: pd.Series,
-    padj_threshold: float | None,
-    log2fc_threshold: float | None,
-) -> pd.Index:
-    """Get the differentially expressed genes.
-
-    We define the differentially expressed genes as the genes with an adjusted p-value
-    below a certain threshold and an absolute log fold change above a certain threshold.
-
-    Parameters
-    ----------
-    method_padj : pd.Series
-        The adjusted p-values, indexed by gene names.
-
-    method_lfc : pd.Series
-        The log fold changes, indexed by gene names, *in natural scale*.
-
-    padj_threshold : float or None
-        The adjusted p-value threshold.
-
-    log2fc_threshold : float or None
-        The log2 fold change threshold.
-
-    Returns
-    -------
-    pd.Index
-        The differentially expressed genes.
-    """
-    # Initialize a boolean series to True
-    condition = pd.Series(True, index=method_padj.index)
-    if padj_threshold is not None:
-        condition &= method_padj < padj_threshold
-
-    if log2fc_threshold is not None:
-        condition &= np.abs(method_lfc) > np.log(2) * log2fc_threshold
-    method_diff_genes = method_padj[condition].index
-    return method_diff_genes
 
 
 def sensitivity(
@@ -67,7 +26,7 @@ def sensitivity(
     padj_threshold: float | None,
     log2fc_threshold: float | None,
 ) -> float:
-    """Compute the number of recovered positives.
+    """Compute the number of recovered positives out of all true positives.
 
     By recovered positives, we mean the fraction of differentially expressed genes
     found by the test method that are also found by the reference method, w.r.t. the
@@ -101,8 +60,7 @@ def sensitivity(
     Returns
     -------
     float
-        The sensitivity score, also known as recall
-        (i.e., the fraction of recovered positives).
+        The sensitivity score, also known as recall.
     """
     method_test_diff_genes = get_de_genes(
         method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
@@ -115,6 +73,63 @@ def sensitivity(
     false_negatives = len(set(method_ref_diff_genes) - set(method_test_diff_genes))
 
     return true_positives / (true_positives + false_negatives)
+
+
+def precision(
+    method_test_padj: pd.Series,
+    method_test_lfc: pd.Series,
+    method_ref_padj: pd.Series,
+    method_ref_lfc: pd.Series,
+    padj_threshold: float | None,
+    log2fc_threshold: float | None,
+) -> float:
+    """Compute the number of true positives out of all predicted positives.
+
+    By true positives, we mean the fraction of differentially expressed genes
+    found by the test method that are also found by the reference method, w.r.t. the
+    differentially expressed genes found by the reference method.
+
+    We define the differentially expressed genes as the genes with an adjusted p-value
+    below a certain threshold and an absolute log fold change above a certain threshold.
+
+    Parameters
+    ----------
+    method_test_padj : pd.Series
+        The adjusted p-values of the test method, indexed by gene names.
+
+    method_test_lfc : pd.Series
+        The log fold changes of the test method, indexed by gene names,
+        *in natural scale*.
+
+    method_ref_padj : pd.Series
+        The adjusted p-values of the reference method, indexed by gene names.
+
+    method_ref_lfc : pd.Series
+        The log fold changes of the reference method, indexed by gene names,
+        *in natural scale*.
+
+    padj_threshold : float or None
+        The adjusted p-value threshold.
+
+    log2fc_threshold : float or None
+        The log2 fold change threshold.
+
+    Returns
+    -------
+    float
+        The precision score.
+    """
+    method_test_diff_genes = get_de_genes(
+        method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
+    )
+    method_ref_diff_genes = get_de_genes(
+        method_ref_padj, method_ref_lfc, padj_threshold, log2fc_threshold
+    )
+
+    true_positives = len(set(method_test_diff_genes) & set(method_ref_diff_genes))
+    false_positives = len(set(method_test_diff_genes) - set(method_ref_diff_genes))
+
+    return true_positives / (true_positives + false_positives)
 
 
 def f1_score(
@@ -315,6 +330,7 @@ SCORING_FUNCTIONS: dict[str, Callable] = {
     "sensitivity_0.05_2.0": partial(
         sensitivity, padj_threshold=0.05, log2fc_threshold=2.0
     ),
+    "precision_0.05_2.0": partial(precision, padj_threshold=0.05, log2fc_threshold=2.0),
     "f1_score_0.05_2.0": partial(f1_score, padj_threshold=0.05, log2fc_threshold=2.0),
     "pearson_correlation_pvalues": pearson_correlation_pvalues,
     "pearson_correlation_pvalues_7": partial(
@@ -335,31 +351,6 @@ SCORING_FUNCTIONS: dict[str, Callable] = {
     ),
     "pearson_correlation_lfcs_0.05": partial(
         pearson_correlation_lfcs, padj_threshold=0.05
-    ),
-}
-
-SCORING_FUNCTIONS_YLABELS: dict[str, str] = {
-    "sensitivity_0.05_2.0": "Sensitivity",
-    "f1_score_0.05_2.0": "F1 score",
-    "pearson_correlation_pvalues": "Pearson correlation of -log10(p-values)",
-    "pearson_correlation_lfcs": "Pearson correlation of log fold changes",
-    "pearson_correlation_pvalues_0.05": (
-        "Pearson correlation of -log10(p-values) \n (padj < 0.05)"
-    ),
-    "pearson_correlation_lfcs_0.05": (
-        "Pearson correlation of log fold changes \n (padj < 0.05)"
-    ),
-    "pearson_correlation_pvalues_7": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-7)"
-    ),
-    "pearson_correlation_pvalues_10": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-10)"
-    ),
-    "pearson_correlation_pvalues_12": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-12)"
-    ),
-    "pearson_correlation_pvalues_15": (
-        "Pearson correlation of -log10(p-values) \n (padj clipped to 1e-15)"
     ),
 }
 
@@ -526,7 +517,7 @@ def build_heterogeneity_grid_plot(
                 else:
                     assert isinstance(method_test_padj, pd.Series)
                     assert isinstance(method_test_lfc, pd.Series)
-                    method_test_str = NAME_MAPPING[method_test]
+                    method_test_str = method_test
                     if heterogeneity_id == 0:
                         methods_test_padj_lfc[method_test_str] = []
                     methods_test_padj_lfc[method_test_str].append(
@@ -571,10 +562,10 @@ def build_heterogeneity_grid_plot(
             lines = []
 
             for method_test, scores_list in scores.items():
-                for k, score in enumerate(scores_list):  # TODO check silent variable
+                for k, score in enumerate(scores_list):
                     lines.append(
                         {
-                            "method_test_name": process_method_test_name(method_test),
+                            "method_test_name": process_method_name(method_test),
                             # Here we invert the heterogeneity level
                             "heterogeneity level": 1.0 - heterogeneity_method_params[k],
                             "score": score,
@@ -791,7 +782,7 @@ def build_test_vs_ref_heterogeneity_plot(
             else:
                 assert isinstance(method_test_padj, pd.Series)
                 assert isinstance(method_test_lfc, pd.Series)
-                method_test_str = NAME_MAPPING[method_test]
+                method_test_str = method_test
                 if heterogeneity_id == 0:
                     methods_test_padj_lfc[method_test_str] = []
                 methods_test_padj_lfc[method_test_str].append(
@@ -852,47 +843,6 @@ def build_test_vs_ref_heterogeneity_plot(
     )
 
 
-def process_method_test_name(method_test_name: str) -> str:
-    """Process the method test name for plots.
-
-    Parameters
-    ----------
-    method_test_name : str
-        The method test name.
-
-    Returns
-    -------
-    str
-        The processed method test name.
-    """
-    if method_test_name.startswith("FedPyDESeq2"):
-        return "\n".join(method_test_name.split(", "))
-    elif method_test_name.startswith("Meta-analysis"):
-        # Split the method name
-        method_test_name_split = method_test_name.split(", ")
-        # Get the meta-analysis type
-        meta_analysis_type = method_test_name_split[1]
-        # Get the method combination
-        method_combination = method_test_name_split[2]
-        # Get the pvalue combination
-        pvalue_combination = method_test_name_split[3]
-        if meta_analysis_type == "random_effect":
-            if method_combination == "dl":
-                return "Random effect\n(DerSimonian-Laird)"
-            else:
-                return f"Random effect\n({method_combination})"
-        elif meta_analysis_type == "fixed_effect":
-            return "Fixed effect"
-        elif meta_analysis_type == "pvalue_combination":
-            return f"P-value combination\n({pvalue_combination})"
-        else:
-            raise ValueError(f"Unknown meta-analysis type: {meta_analysis_type}")
-    elif method_test_name.startswith("PyDESeq2"):
-        return "\n".join(method_test_name.split(", "))
-    else:
-        raise ValueError(f"Unknown method test name: {method_test_name}")
-
-
 def make_heterogeneity_plot(
     scores: dict[str, list[float]],
     heterogeneity_method_params: list[float],
@@ -930,7 +880,7 @@ def make_heterogeneity_plot(
         for i, score in enumerate(scores_list):
             lines.append(
                 {
-                    "method_test_name": process_method_test_name(method_test),
+                    "method_test_name": process_method_name(method_test),
                     # Here we invert the heterogeneity level
                     "heterogeneity level": (
                         heterogeneity_method_params_names[i]
@@ -964,7 +914,8 @@ def make_heterogeneity_plot(
     _, xlabels = plt.xticks()
     xticks_loc = ax.get_xticks()
     ax.set_xticks(xticks_loc)
-    ax.set_xticklabels(xlabels, size=5)
+    ax.set_xlabel("")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
     # create the save directory
     heterogeneity_plot_save_path = Path(heterogeneity_plot_save_path)
     heterogeneity_plot_save_path.parent.mkdir(parents=True, exist_ok=True)

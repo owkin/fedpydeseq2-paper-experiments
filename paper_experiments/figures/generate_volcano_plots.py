@@ -11,10 +11,8 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.lines import Line2D
 
-from paper_experiments.figures.generate_cross_tables_utils import NAME_MAPPING
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
@@ -171,7 +169,7 @@ def build_volcano_plot(
                 padj_threshold,
                 log2fc_threshold,
                 save_file_path,
-                plot_title=f"{NAME_MAPPING[method_name]} ({submethod_name})",
+                plot_title=f"{process_method_name(method_id)}",
                 annotate_genes=False,
                 write_legend=True,
                 pydeseq2_padj=pydeseq2_padj,
@@ -193,7 +191,7 @@ def build_volcano_plot(
             padj_threshold,
             log2fc_threshold,
             save_file_path,
-            plot_title=f"{NAME_MAPPING[method_name]}",
+            plot_title=f"{process_method_name(method_name)}",
             annotate_genes=False,
             write_legend=True,
             pydeseq2_padj=pydeseq2_padj,

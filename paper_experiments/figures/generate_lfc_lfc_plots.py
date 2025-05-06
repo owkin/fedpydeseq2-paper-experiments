@@ -11,10 +11,8 @@ from fedpydeseq2_datasets.utils import get_experiment_id
 from loguru import logger
 from matplotlib.lines import Line2D
 
-from paper_experiments.figures.generate_cross_tables_utils import NAME_MAPPING
-from paper_experiments.figures.generate_cross_tables_utils import (
-    get_padj_lfc_from_method,
-)
+from paper_experiments.figures.utils import get_padj_lfc_from_method
+from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
 
@@ -174,7 +172,7 @@ def build_lfc_lfc_and_padj_padj_plot(
                 padj_threshold,
                 log2fc_threshold,
                 save_file_path=lfc_save_file_path,
-                plot_title=f"{NAME_MAPPING[method_name]} ({submethod_name})",
+                plot_title=f"{process_method_name(method_id)}",
                 annotate_genes=False,
                 write_legend=True,
                 pydeseq2_padj=pydeseq2_padj,
@@ -188,7 +186,7 @@ def build_lfc_lfc_and_padj_padj_plot(
                 padj_threshold,
                 log2fc_threshold,
                 save_file_path=padj_save_file_path,
-                plot_title=f"{NAME_MAPPING[method_name]} ({submethod_name})",
+                plot_title=f"{process_method_name(method_id)}",
                 annotate_genes=False,
                 write_legend=True,
                 pydeseq2_lfc=pydeseq2_lfc,
@@ -213,7 +211,7 @@ def build_lfc_lfc_and_padj_padj_plot(
             padj_threshold,
             log2fc_threshold,
             save_file_path=lfc_save_file_path,
-            plot_title=f"{NAME_MAPPING[method_name]}",
+            plot_title=f"{process_method_name(method_name)}",
             annotate_genes=False,
             write_legend=True,
             pydeseq2_padj=pydeseq2_padj,
@@ -227,7 +225,7 @@ def build_lfc_lfc_and_padj_padj_plot(
             padj_threshold,
             log2fc_threshold,
             save_file_path=padj_save_file_path,
-            plot_title=f"{NAME_MAPPING[method_name]}",
+            plot_title=f"{process_method_name(method_name)}",
             annotate_genes=False,
             write_legend=True,
             pydeseq2_lfc=pydeseq2_lfc,
@@ -507,6 +505,7 @@ def make_lfc_lfc_plot(
 
         adjust_text(texts, arrowprops={"arrowstyle": "-", "color": "k"})
 
+    ax.set_aspect("equal")
     ax.get_legend().remove()
     if write_legend:
         if pydeseq2_padj is not None:
@@ -627,10 +626,9 @@ def make_lfc_lfc_plot(
 
     plt.title(plot_title, size=16, weight="bold")
 
-    plt.tight_layout()
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_file_path, transparent=True)
+    plt.savefig(save_file_path, transparent=True, bbox_inches="tight")
     plt.close()
 
 
@@ -883,6 +881,8 @@ def make_padj_padj_plot(
         linewidth=2,
     )
 
+    ax.set_aspect("equal")
+
     if annotate_genes:
         texts = []
         for i in range(len(df)):
@@ -1022,8 +1022,7 @@ def make_padj_padj_plot(
 
     plt.title(plot_title, size=16, weight="bold")
 
-    plt.tight_layout()
     save_file_path = Path(save_file_path)
     save_file_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(save_file_path)
+    plt.savefig(save_file_path, transparent=True, bbox_inches="tight")
     plt.close()
