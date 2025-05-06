@@ -72,10 +72,10 @@ plots:
     log2fc_threshold: 2.0
     padj_threshold: 0.05
     method_pairs:
-    - ['fedpydeseq2_simulated', 'pydeseq2']
-    - ['fedpydeseq2_remote', 'pydeseq2']
-    - ['pydeseq2_largest', 'pydeseq2']
-    - ['meta_analysis', 'pydeseq2']
+      - ["fedpydeseq2_simulated", "pydeseq2"]
+      - ["fedpydeseq2_remote", "pydeseq2"]
+      - ["pydeseq2_largest", "pydeseq2"]
+      - ["meta_analysis", "pydeseq2"]
   lfc_lfc_plots:
     log2fc_threshold: 2.0
     padj_threshold: 0.05
@@ -87,7 +87,7 @@ plots:
       - pydeseq2
   violin_plots:
     methods:
-    - fedpydeseq2_remote
-    - meta_analysis
-    - pydeseq2_largest
-    - pydeseq2
+      - fedpydeseq2_remote
+      - meta_analysis
+      - pydeseq2_largest
+      - pydeseq2
