@@ -31,8 +31,7 @@ def build_lfc_or_padj_rel_error_violin_plot(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build violin plots of the relative error of the log-fold change and padj.
+    """Build violin plots of the relative error of the lfc and padj.
 
     Parameters
     ----------
@@ -82,7 +81,6 @@ def build_lfc_or_padj_rel_error_violin_plot(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2.
         For example the contrast parameter.
-
     """
     experiment_id = get_experiment_id(
         dataset_name=dataset_name,
@@ -120,9 +118,9 @@ def build_lfc_or_padj_rel_error_violin_plot(
             assert set(method_padj.keys()) == set(method_lfc.keys())
             for method_id in method_padj.keys():
                 # Extract the meta-analysis submethod name in a more readable format
-                submethod_name = method_id.split(", ")[1:]
+                submethod_name_list = method_id.split(", ")[1:]
                 submethod_name = "_".join(
-                    [param for param in submethod_name if param != "None"]
+                    [param for param in submethod_name_list if param != "None"]
                 )
                 all_methods.append(submethod_name)
 
@@ -174,8 +172,7 @@ def make_lfc_or_padj_violin_plot(
     linthresh: float = 1e-8,
     padj_or_lfc: str = "lfc",
 ):
-    """
-    Make a violin plot of the relative error of the log-fold change or padj.
+    """Make a violin plot of the relative error of the log-fold change or padj.
 
     Parameters
     ----------
@@ -198,11 +195,11 @@ def make_lfc_or_padj_violin_plot(
 
     assert padj_or_lfc in ["lfc", "padj"]
 
-    symlogscale = SymmetricalLogScale(ax, linthresh=linthresh)
+    symlogscale = SymmetricalLogScale(ax, linthresh=linthresh)  # type: ignore
 
-    df[
-        f"symlog_{padj_or_lfc}_rel_error"
-    ] = symlogscale.get_transform().transform_non_affine(df[f"{padj_or_lfc}_rel_error"])
+    df[f"symlog_{padj_or_lfc}_rel_error"] = (
+        symlogscale.get_transform().transform_non_affine(df[f"{padj_or_lfc}_rel_error"])
+    )
 
     df.reset_index(drop=True, inplace=True)
 
@@ -244,10 +241,10 @@ def make_lfc_or_padj_violin_plot(
             min(
                 symlogscale.get_transform()
                 .transform_non_affine(np.array([ymax]))
-                .item(),
+                .item(),  # type: ignore
                 symlogscale.get_transform()
                 .transform_non_affine(np.array([1e6]))
-                .item(),
+                .item(),  # type: ignore
             ),
         ),
     )

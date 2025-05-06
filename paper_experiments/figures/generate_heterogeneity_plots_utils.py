@@ -144,8 +144,7 @@ def f1_score(
     padj_threshold: float | None,
     log2fc_threshold: float | None,
 ):
-    """
-    Compute the F1 score.
+    """Compute the F1 score.
 
     The F1 score is the harmonic mean of the precision and recall.
 
@@ -175,7 +174,6 @@ def f1_score(
     -------
     float
         The F1 score.
-
     """
     method_test_diff_genes = get_de_genes(
         method_test_padj, method_test_lfc, padj_threshold, log2fc_threshold
@@ -203,8 +201,7 @@ def pearson_correlation_pvalues(
     log2fc_threshold: float | None = None,
     padj_lower_bound: float = 1e-10,
 ) -> float:
-    """
-    Compute the Pearson correlation of the -log10(p-values).
+    """Compute the Pearson correlation of the -log10(p-values).
 
     Parameters
     ----------
@@ -240,7 +237,6 @@ def pearson_correlation_pvalues(
     -------
     float
         The Pearson correlation of the -log10(p-values).
-
     """
     reference_genes = get_de_genes(
         method_ref_padj, method_ref_lfc, padj_threshold, log2fc_threshold
@@ -286,8 +282,7 @@ def pearson_correlation_lfcs(
     padj_threshold: float | None = None,
     log2fc_threshold: float | None = None,
 ) -> float:
-    """
-    Compute the Pearson correlation of the log fold changes.
+    """Compute the Pearson correlation of the log fold changes.
 
     Parameters
     ----------
@@ -319,7 +314,6 @@ def pearson_correlation_lfcs(
     -------
     float
         The Pearson correlation of the LFC.
-
     """
     # Compute common genes where the pvalue is not NaN
     reference_genes = get_de_genes(
@@ -384,8 +378,7 @@ def build_heterogeneity_grid_plot(
     meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Make a grid of barplots to summarize heterogeneity experiments.
+    """Make a grid of barplots to summarize heterogeneity experiments.
 
     Represents barplots side by side for each dataset and each scoring function, with a
     common legend.
@@ -544,12 +537,12 @@ def build_heterogeneity_grid_plot(
             meta_analysis_parameters=meta_analysis_parameters,
         )
 
-        assert not (
-            isinstance(method_ref_padj, dict)
-        ), "Reference method should not be per center nor meta-analysis"
-        assert not (
-            isinstance(method_ref_lfc, dict)
-        ), "Reference method should not be per center nor meta-analysis"
+        assert not (isinstance(method_ref_padj, dict)), (
+            "Reference method should not be per center nor meta-analysis"
+        )
+        assert not (isinstance(method_ref_lfc, dict)), (
+            "Reference method should not be per center nor meta-analysis"
+        )
 
         for j, scoring_function_name in enumerate(scoring_function_names):
             # Compute scores
@@ -619,7 +612,7 @@ def build_heterogeneity_grid_plot(
         ax.get_legend().remove()
 
     legend = fig.legend(
-        lines,
+        lines,  # type: ignore
         labels,
         loc="center",
         bbox_to_anchor=(0.5, 1.05),
@@ -660,8 +653,7 @@ def build_test_vs_ref_heterogeneity_plot(
     meta_analysis_parameters: list[MetaAnalysisParameter] | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build a cross table between a test method and a reference method.
+    """Build a cross table between a test method and a reference method.
 
     Parameters
     ----------
@@ -726,7 +718,6 @@ def build_test_vs_ref_heterogeneity_plot(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2
         methods.
-
     """
     # Get experiment id for each heterogeneity method param
     experiment_ids = [
@@ -812,12 +803,12 @@ def build_test_vs_ref_heterogeneity_plot(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
-    assert not (
-        isinstance(method_ref_padj, dict)
-    ), "Reference method should not be per center nor meta-analysis"
-    assert not (
-        isinstance(method_ref_lfc, dict)
-    ), "Reference method should not be per center nor meta-analysis"
+    assert not (isinstance(method_ref_padj, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
+    assert not (isinstance(method_ref_lfc, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
 
     heterogeneity_plot_name = get_heterogeneity_plot_name(
         methods_test=methods_test,
@@ -864,8 +855,7 @@ def make_heterogeneity_plot(
     heterogeneity_plot_save_path: str | Path,
     heterogeneity_method_params_names: dict[int, str] | None = None,
 ):
-    """
-    Make a heterogeneity plot.
+    """Make a heterogeneity plot.
 
     Parameters
     ----------
@@ -886,7 +876,6 @@ def make_heterogeneity_plot(
 
     heterogeneity_method_params_names : dict[int, str] or None
         The heterogeneity method parameters names.
-
     """
     sns.set_style("whitegrid")
     # Create a dataframe with all scores
@@ -897,9 +886,11 @@ def make_heterogeneity_plot(
                 {
                     "method_test_name": process_method_name(method_test),
                     # Here we invert the heterogeneity level
-                    "heterogeneity level": heterogeneity_method_params_names[i]
-                    if heterogeneity_method_params_names is not None
-                    else 1.0 - heterogeneity_method_params[i],
+                    "heterogeneity level": (
+                        heterogeneity_method_params_names[i]
+                        if heterogeneity_method_params_names is not None
+                        else 1.0 - heterogeneity_method_params[i]
+                    ),
                     "score": score,
                 }
             )
@@ -941,8 +932,7 @@ def get_heterogeneity_plot_name(
     method_ref: str,
     scoring_function_name: str,
 ) -> str:
-    """
-    Get the heterogeneity plot name.
+    """Get the heterogeneity plot name.
 
     Parameters
     ----------
@@ -959,7 +949,6 @@ def get_heterogeneity_plot_name(
     -------
     str
         The heterogeneity plot name.
-
     """
     methods_test_str = "-".join(methods_test)
     return (

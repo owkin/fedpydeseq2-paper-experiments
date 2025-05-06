@@ -1,0 +1,6 @@
+raw_workflow_file: ""
+cleaned_workflow_file: ""
+processed_workflow_dir: ""
+output_dir: ""
+raw_data_path: ""
+processed_data_path: null

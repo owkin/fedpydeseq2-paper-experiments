@@ -15,7 +15,6 @@ from paper_experiments.figures.utils import get_padj_lfc_from_method
 from paper_experiments.figures.utils import process_method_name
 from paper_experiments.utils.constants import MetaAnalysisParameter
 
-
 def build_pan_cancer_confusion_matrix(
     method_test,
     method_ref,
@@ -34,8 +33,7 @@ def build_pan_cancer_confusion_matrix(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Make a pan-cancer confusion matrix between a test method and a reference method.
+    """Make a pan-cancer confusion matrix between test and ref method.
 
     Represents confusion matrices sides by side for each dataset, with a common
     colorbar.
@@ -416,8 +414,7 @@ def build_test_vs_ref_cross_table(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build a cross table between a test method and a reference method.
+    """Build a cross table between a test method and a reference method.
 
     Parameters
     ----------
@@ -489,7 +486,6 @@ def build_test_vs_ref_cross_table(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2
         methods.
-
     """
     # set experiment id
     test_experiment_id = get_experiment_id(
@@ -543,12 +539,12 @@ def build_test_vs_ref_cross_table(
         meta_analysis_parameters=meta_analysis_parameters,
     )
 
-    assert not (
-        isinstance(method_ref_padj, dict)
-    ), "Reference method should not be per center nor meta-analysis"
-    assert not (
-        isinstance(method_ref_lfc, dict)
-    ), "Reference method should not be per center nor meta-analysis"
+    assert not (isinstance(method_ref_padj, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
+    assert not (isinstance(method_ref_lfc, dict)), (
+        "Reference method should not be per center nor meta-analysis"
+    )
 
     save_file_path = (
         cross_table_save_path
@@ -788,8 +784,7 @@ def build_test_vs_ref_cross_tables(
     padj_threshold: float = 0.05,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build cross tables for a list of test-reference method pairs.
+    """Build cross tables for a list of test-reference method pairs.
 
     Parameters
     ----------
@@ -856,7 +851,6 @@ def build_test_vs_ref_cross_tables(
     **pydeseq2_kwargs : Any
         Additional keyword arguments to pass to the PyDESeq2 and FedPyDESeq2.
         For example the contrast parameter.
-
     """
     if isinstance(ref_with_heterogeneity, bool):
         ref_with_heterogeneity = [ref_with_heterogeneity] * len(method_pairs)
@@ -903,8 +897,7 @@ def build_cross_table(
     method_test_name: str | None,
     method_ref_name: str,
 ):
-    """
-    Build a 3x3 confusion matrix between a test method and a reference method.
+    """Build a 3x3 confusion matrix between test and ref method.
 
     The confusion matrix is normalized by columns, i.e., w.r.t. the reference method.
 
@@ -940,8 +933,6 @@ def build_cross_table(
 
     method_ref_name : str
         The name of the reference method.
-
-
     """
     plt.clf()
     if isinstance(method_test_padj, dict):
@@ -968,6 +959,10 @@ def build_cross_table(
     else:
         assert method_test_name is not None
         fig, ax = plt.subplots(figsize=(8, 8))
+        assert isinstance(method_test_LFC, pd.Series)
+        assert isinstance(method_test_padj, pd.Series)
+        assert isinstance(method_ref_LFC, pd.Series)
+        assert isinstance(method_ref_padj, pd.Series)
         build_cross_table_on_ax(
             method_test_padj=method_test_padj,
             method_test_LFC=method_test_LFC,
@@ -1000,8 +995,7 @@ def build_cross_table_on_ax(
     ax: plt.Axes,
     cbar_ax: plt.Axes | None = None,
 ):
-    """
-    Build a 3x3 confusion matrix between a test method and a reference method.
+    """Build a 3x3 confusion matrix between a test and reference method.
 
     The confusion matrix is normalized by columns, i.e., w.r.t. the reference method.
 
@@ -1111,8 +1105,7 @@ def build_33_confusion_matrix(
     method_2_down_genes: set,
     all_genes: set,
 ):
-    """
-    Build a 3x3 confusion matrix.
+    """Build a 3x3 confusion matrix.
 
     Parameters
     ----------
@@ -1163,8 +1156,7 @@ def build_33_heatmap_matrix(
     method_ref_down_genes: set,
     all_genes: set,
 ):
-    """
-    Build a 3x3 heatmap matrix.
+    """Build a 3x3 heatmap matrix.
 
     This heatmap matrix computest the following formula:
     len(

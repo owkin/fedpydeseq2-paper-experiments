@@ -37,8 +37,7 @@ def setup_tcga_data_folder(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ) -> tuple[int, Path]:
-    """
-    Set the TCGA data folder.
+    """Set the TCGA data folder.
 
     Parameters
     ----------
@@ -81,7 +80,6 @@ def setup_tcga_data_folder(
 
     centers_root_directory : Path
         The path to the centers root directory.
-
     """
     setup_tcga_dataset(
         raw_data_path,
@@ -258,7 +256,6 @@ def run_fedpydeseq2_tcga_pipe(
 
     **kwargs: Any
         Additional parameters to pass the FedPyDESeq2 strategy.
-
     """
     only_two_centers = not keep_original_centers
     if ref_levels is None:
@@ -467,8 +464,7 @@ def main():
         help=raw_data_path_help,
     )
     processed_data_path_help = (
-        "The path to the processed data. The subdirectories "
-        "will be created if needed."
+        "The path to the processed data. The subdirectories will be created if needed."
     )
     parser.add_argument(
         "--processed_data_path",
@@ -602,9 +598,7 @@ def main():
     parser.add_argument(
         "--simulate",
         action="store_true",
-        help=(
-            "Whether to simulate the experiment when using the " "subprocess backend."
-        ),
+        help=("Whether to simulate the experiment when using the subprocess backend."),
     )
 
     parser.add_argument(

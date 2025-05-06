@@ -36,8 +36,7 @@ def run_tcga_meta_analysis_experiments(
     heterogeneity_method_param: float | None = None,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Run TCGA meta-analysis experiments.
+    """Run TCGA meta-analysis experiments.
 
     Parameters
     ----------
@@ -205,10 +204,10 @@ def run_tcga_meta_analysis_experiments(
     meta_analysis_results["padj"] = pd.NA
     meta_analysis_results["padj"] = pd.NA
 
-    meta_analysis_results.loc[
-        ~meta_analysis_results["pvalue"].isna(), "padj"
-    ] = false_discovery_control(
-        meta_analysis_results.loc[~meta_analysis_results["pvalue"].isna(), "pvalue"]
+    meta_analysis_results.loc[~meta_analysis_results["pvalue"].isna(), "padj"] = (
+        false_discovery_control(
+            meta_analysis_results.loc[~meta_analysis_results["pvalue"].isna(), "pvalue"]
+        )
     )
 
     # Save the results
@@ -245,8 +244,7 @@ def get_meta_analysis_id(
     method_combination: str | None = None,
     stats_clip_value: float | None = None,
 ) -> str:
-    """
-    Get the meta-analysis id.
+    """Get the meta-analysis id.
 
     Parameters
     ----------
@@ -273,7 +271,6 @@ def get_meta_analysis_id(
     -------
     str
         The meta-analysis id.
-
     """
     assert meta_analysis_type in {
         "pvalue_combination",
@@ -312,8 +309,7 @@ def get_meta_analysis_id(
 
 
 def get_common_genes(local_stats_results: dict, dropna: bool = False) -> pd.Index:
-    """
-    Get the common genes between all the local stats results.
+    """Get the common genes between all the local stats results.
 
     Parameters
     ----------
@@ -328,7 +324,6 @@ def get_common_genes(local_stats_results: dict, dropna: bool = False) -> pd.Inde
     -------
     pd.Index
         The index of the common genes.
-
     """
     cols = ["lfc", "lfcSE"]
     # get first key
@@ -357,8 +352,7 @@ def run_statsmodels_meta_analysis_single_gene(
     method_random_effects: str | None = "dl",
     ignore_nan_centers: bool = True,
 ) -> pd.Series:
-    """
-    Run the statsmodels meta-analysis for a single gene.
+    """Run the statsmodels meta-analysis for a single gene.
 
     Parameters
     ----------
@@ -386,7 +380,6 @@ def run_statsmodels_meta_analysis_single_gene(
     -------
     pd.Series
         The meta-analysis results for the gene
-
     """
     if meta_analysis_type == "fixed_effect":
         # Set the method_re to "dl" as it does not matter
@@ -436,8 +429,7 @@ def run_pvalue_combination_single_gene(
     method_combination: str,
     ignore_nan_centers: bool = True,
 ) -> pd.Series:
-    """
-    Run the p-value combination for a single gene.
+    """Run the p-value combination for a single gene.
 
     Ignores local NaN pvalues and lfc.
 
@@ -464,7 +456,6 @@ def run_pvalue_combination_single_gene(
     -------
     pd.Series
         The meta-analysis results for the gene
-
     """
     num_samples = np.sum(sizes)
 

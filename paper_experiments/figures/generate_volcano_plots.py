@@ -36,8 +36,7 @@ def build_volcano_plot(
     log2fold_clip: float | None = 10,
     **pydeseq2_kwargs: Any,
 ):
-    """
-    Build a volcano plot for a given method.
+    """Build a volcano plot for a given method.
 
     Parameters
     ----------
@@ -139,6 +138,8 @@ def build_volcano_plot(
             reference_dds_ref_level=reference_dds_ref_level,
             meta_analysis_parameters=meta_analysis_parameters,
         )
+        assert isinstance(pydeseq2_padj, pd.Series)
+        assert isinstance(pydeseq2_lfc, pd.Series)
     else:
         pydeseq2_padj, pydeseq2_lfc = None, None
 
@@ -149,9 +150,9 @@ def build_volcano_plot(
         assert set(method_padj.keys()) == set(method_lfc.keys())
         for method_id in method_padj.keys():
             # Extract the meta-analysis submethod name in a more readable format
-            submethod_name = method_id.split(", ")[1:]
+            submethod_name_list = method_id.split(", ")[1:]
             submethod_name = "_".join(
-                [param for param in submethod_name if param != "None"]
+                [param for param in submethod_name_list if param != "None"]
             )
 
             save_file_path = (
@@ -159,10 +160,12 @@ def build_volcano_plot(
                 / experiment_id
                 / f"volcano_plot_{method_name}_{submethod_name}.pdf"
             )
+            method_specific_padj = method_padj[method_id]
+            method_specific_lfc = method_lfc[method_id]
 
             make_volcano_plot(
-                method_padj[method_id],
-                method_lfc[method_id],
+                method_specific_padj,
+                method_specific_lfc,
                 padj_threshold,
                 log2fc_threshold,
                 save_file_path,
@@ -179,6 +182,8 @@ def build_volcano_plot(
         save_file_path = (
             volcano_plot_save_path / experiment_id / f"volcano_plot_{method_name}.pdf"
         )
+        assert isinstance(method_padj, pd.Series)
+        assert isinstance(method_lfc, pd.Series)
 
         make_volcano_plot(
             method_padj,
@@ -210,8 +215,7 @@ def make_volcano_plot(
     nlog10pval_clip: float | None = 10,
     log2fold_clip: float | None = 10,
 ):
-    """
-    Create a volcano plot from adjusted p-values and log-fold changes.
+    """Create a volcano plot from adjusted p-values and log-fold changes.
 
     Summarizes the results of a differential expression analysis by plotting
     the negative log10-transformed adjusted p-values against the log2 fold change.
@@ -325,9 +329,9 @@ def make_volcano_plot(
     df["nlog10"] = -df.apply(lambda x: np.log10(x["padj"]), axis=1)
 
     if pydeseq2_padj is not None:
-        assert (
-            pydeseq2_lfc is not None
-        ), "pydeseq2_lfc is None. Both pydesq2_padj and pydeseq2_lfc must be provided."
+        assert pydeseq2_lfc is not None, (
+            "pydeseq2_lfc is None. Both pydesq2_padj and pydeseq2_lfc must be provided."
+        )
 
         df["pydeseq2_padj"] = pydeseq2_padj
         df["pydeseq2_log2FoldChange"] = pydeseq2_lfc / np.log(2)

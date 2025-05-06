@@ -1,0 +1,4 @@
+[pydocstyle]
+convention = numpy
+match = (?!_).*\.py
+add_ignore = D100, D104, D105, D202, D205, D400, D406, D407,
