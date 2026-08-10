@@ -2,12 +2,12 @@ default_language_version:
   python: python3.11
 repos:
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.33.1
+    rev: 0.38.0
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         name: Trim trailing whitespace
